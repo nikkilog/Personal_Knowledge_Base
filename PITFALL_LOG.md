@@ -760,13 +760,13 @@ Notebook 已通过语法或静态编译检查，但正式运行时出现未定�
 ## P039｜关键文档压缩造成语义丢失
 
 -   状态：已确认。
--   问题与适用范围：重写或大幅压缩 Handoff、Master Plan、Document Map、Handoff Index 等关键项目文档时，篇幅虽缩短，仍有效的运行入口、资源边界、风险、故障经验、验收规则或停止条件也可能被删除；适用于所有承担运行、排障、验收或交接职责的关键文档。
--   可观察表现：Diff 显示大量删除或整体重写，新文档只保留最新状态；格式检查通过，但旧版中的有效事实在新版无对应位置。
--   根因：只按重复率或篇幅压缩，只保留最新状态，没有比较新旧版本的语义，并默认旧内容都已过时。
--   错误处理：因为新版更短就直接提交；只运行 Markdown 格式检查或只看 diff stat；看到大量删除却不逐项核对事实。
--   正确处理：提交前执行只读语义保全审查，将删除内容分类为 `SUPERSEDED_CORRECTLY`、`DUPLICATE_REMOVED`、`HISTORICAL_ONLY`、`MOVED_TO_CORRECT_DOCUMENT`、`VALID_CONTENT_LOST`、`NEEDS_CONFIRMATION` 或 `OUT_OF_SCOPE_CHANGE`。存在 `VALID_CONTENT_LOST` 或 `OUT_OF_SCOPE_CHANGE` 时不得提交，只定向恢复有效内容，不机械恢复整份旧文档。
--   验证方式：比较 HEAD 与工作树版本，逐项核对运行、配置、风险、故障、验收和停止条件，再运行 `git diff --check`。
--   防复发规则：关键文档出现高删除比例、整体重写、职责变化、大量迁移，或运行、排障、验收、停止条件被压缩时，语义保全审查是提交门禁。
+-   问题与适用范围：重写或大幅压缩 Handoff、Master Plan、Document Map、Handoff Index 等关键项目文档，或在跨阶段、跨窗口、Source Mode 切换时传递知识候选，仍有效的运行入口、资源边界、风险、故障经验、验收规则、停止条件或待处置知识可能被删除；适用于所有承担运行、排障、验收、交接或知识吸收职责的载体。
+-   可观察表现：Diff 显示大量删除或整体重写，新文档只保留最新状态；格式检查通过，但旧版中的有效事实在新版无对应位置；前一阶段已判定需要吸收的知识候选，在后一阶段因来源上下文不可读而被错误判为无需处理。
+-   根因：只按重复率或篇幅压缩，只保留最新状态，没有比较新旧版本的语义，并默认旧内容都已过时；或把 Source Mode 当作候选事实的唯一来源，没有把尚未处置的知识摘要作为跨阶段状态持续传递。
+-   错误处理：因为新版更短就直接提交；只运行 Markdown 格式检查或只看 diff stat；看到大量删除却不逐项核对事实；切换窗口或 Source Mode 后丢弃此前已识别的候选，并以当前阶段无法重读原始上下文为由改判无需吸收。
+-   正确处理：提交前执行只读语义保全审查，将删除内容分类为 `SUPERSEDED_CORRECTLY`、`DUPLICATE_REMOVED`、`HISTORICAL_ONLY`、`MOVED_TO_CORRECT_DOCUMENT`、`VALID_CONTENT_LOST`、`NEEDS_CONFIRMATION` 或 `OUT_OF_SCOPE_CHANGE`。存在 `VALID_CONTENT_LOST` 或 `OUT_OF_SCOPE_CHANGE` 时不得提交，只定向恢复有效内容，不机械恢复整份旧文档。已识别但尚未处置的 PKB 候选必须以 `PKB_SOURCE_SUMMARY` 持续携带，直至明确进入 `ABSORBED_INTO_PKB`、`ALREADY_COVERED_IN_PKB`、`USER_DECLINED` 或 `INVALIDATED_WITH_REASON` 之一。
+-   验证方式：比较 HEAD 与工作树版本，逐项核对运行、配置、风险、故障、验收和停止条件，再运行 `git diff --check`；跨阶段流程还应逐项核对 `PKB_SOURCE_SUMMARY` 中的候选及其最终处置状态，确保没有无理由消失或改判。
+-   防复发规则：关键文档出现高删除比例、整体重写、职责变化、大量迁移，运行、排障、验收、停止条件被压缩，或知识吸收流程切换阶段、窗口、Source Mode 时，语义保全审查是提交或结束流程的门禁。
 
 ## P040｜把已经完成的状态误判成前置条件失败
 
@@ -783,12 +783,12 @@ Notebook 已通过语法或静态编译检查，但正式运行时出现未定�
 
 -   状态：已确认。
 -   问题与适用范围：正式资产的 Current 身份、稳定路径是否落位、Evidence Maturity、用户验收和 Git 冻结是相互关联但不能互相替代的判断；适用于代码、Notebook、数据管道、正式文档、发布资产和外部交付物。
--   可观察表现：新版缺少同等级运行证据就被自动降级；文件一旦标记 Current 就被宣称已验收或冻结；旧版证据被用来证明当前版本；存在成功 Live Run 和用户确认，却无法证明运行对应哪个字节版本。
--   根因：把正式入口治理、稳定路径、运行证据、用户判断和版本控制状态压缩成一个状态，或让证据缺少对资产完整 Hash 与内部版本的绑定。
--   错误处理：因证据不足撤销已确认的 Current 身份；因 Current 或稳定路径存在就宣称 Accepted/Frozen；让旧版 evidence 自动继承给新版；把无法绑定 exact Hash 的用户运行说明伪造成仓库 exact-hash evidence。
--   正确处理：Current 身份依次依据用户当前明确确认、项目 `PROJECT.md`、`current/` 稳定路径、已验收的 Git 历史、Current Handoff 和 Index；稳定路径落位单独记录。验收成熟度另按静态检查、测试、Dry Run、Live Run、回读、reconciliation 和 Warning 解释判断，用户验收与 Git 冻结也分别记录。新版是 Current 但缺少同等级证据时标记 `EVIDENCE_GAP`；旧版 evidence 必须明确绑定旧版。正式运行 manifest 应记录资产内部版本和完整 SHA-256；无法绑定时只保持 `USER_PROVIDED` 或 `USER_CONFIRMED` 等实际证据等级。
--   验证方式：分别列出 Current 身份、稳定路径、证据成熟度、用户验收和 Git 状态；确认每项 evidence 可追溯到对应资产。声称 exact-hash evidence 时，manifest 中的完整 SHA-256 和内部版本必须与被验资产一致。
--   防复发规则：状态模型必须分设正式身份、路径落位、Evidence Maturity、用户验收和 Git 冻结字段；任何升级、降级或验收结论都逐项核对，不能相互代替。
+-   可观察表现：新版缺少同等级运行证据就被自动降级；文件一旦标记 Current 就被宣称已验收或冻结；旧版证据被用来证明当前版本；存在成功 Live Run 和用户确认，却无法证明运行对应哪个字节版本；Git 合并或冻结已经完成且工作树干净，但权威项目文档仍保留旧分支、旧 revision、旧 merge 状态或已经失效的 Next Action。
+-   根因：把正式入口治理、稳定路径、运行证据、用户判断、版本控制状态和文档状态压缩成一个状态，或让证据缺少对资产完整 Hash 与内部版本的绑定；误把工作树干净当成所有权威文档已同步最终状态的证明。
+-   错误处理：因证据不足撤销已确认的 Current 身份；因 Current、稳定路径或干净工作树存在就宣称 Accepted/Frozen 或全部收口完成；让旧版 evidence 自动继承给新版；把无法绑定 exact Hash 的用户运行说明伪造成仓库 exact-hash evidence；合并后不检查各权威文档中的状态字段和 Next Action。
+-   正确处理：Current 身份依次依据用户当前明确确认、项目 `PROJECT.md`、`current/` 稳定路径、已验收的 Git 历史、Current Handoff 和 Index；稳定路径落位单独记录。验收成熟度另按静态检查、测试、Dry Run、Live Run、回读、reconciliation 和 Warning 解释判断，用户验收、Git 冻结和文档状态也分别记录。新版是 Current 但缺少同等级证据时标记 `EVIDENCE_GAP`；旧版 evidence 必须明确绑定旧版。正式运行 manifest 应记录资产内部版本和完整 SHA-256；无法绑定时只保持 `USER_PROVIDED` 或 `USER_CONFIRMED` 等实际证据等级。Git 合并或冻结后，对 PROJECT、Master Plan、Project Handoff、Module Handoff、Document Map 和 Handoff Index 执行定向状态一致性检查，更新仍有效的 branch、revision、merge 状态和 Next Action；工作树干净不能替代该检查。
+-   验证方式：分别列出 Current 身份、稳定路径、证据成熟度、用户验收、Git 状态和文档状态；确认每项 evidence 可追溯到对应资产。声称 exact-hash evidence 时，manifest 中的完整 SHA-256 和内部版本必须与被验资产一致。合并或冻结后逐份核对适用的权威文档，确认其中的分支、revision、merge 状态和 Next Action 与最终状态一致，且文档之间不存在冲突。
+-   防复发规则：状态模型必须分设正式身份、路径落位、Evidence Maturity、用户验收、Git 冻结和文档状态字段；任何升级、降级、验收或收口结论都逐项核对，不能相互代替。工作树干净只作为 Git 检查结果，不作为多文档状态一致性的替代证据。
 
 ## P042｜刷新既有 OAuth Token 时擅自扩大授权范围
 
