@@ -13,6 +13,15 @@ A qualifying Pitfall must contain:
 
 Do not create vague reminders such as “pay attention next time,” “be careful,” “there may be a problem,” or “remember to check.”
 
-Add a Pitfall only when the problem actually occurred, its root cause and correct handling are known, recurrence is plausible, and the lesson has cross-task reuse value. If evidence remains incomplete, keep it outside the Current Pitfall log until the uncertainty is explicitly represented by an existing accepted structure.
+Add a Pitfall only when:
 
-Do not create synonymous entries for existing lessons about Current identity and authority, Evidence Maturity, idempotent result-state recognition, or preservation of critical document semantics. Merge into the existing entry when new evidence materially improves it; otherwise mark it already covered.
+- the problem actually occurred;
+- the observable evidence is known;
+- the root cause is sufficiently established;
+- the correct handling was verified or strongly evidenced;
+- recurrence is plausible;
+- the lesson has cross-task reuse value.
+
+If evidence remains incomplete, do not create a new Current Pitfall. Keep it project-only, mark it `NO_ACTION`, or merge only the verified portion into an accepted existing structure.
+
+Do not create synonymous entries for existing lessons about Current identity and authority, Evidence Maturity, idempotent result-state recognition, source-project-first closeout, or preservation of critical document semantics. Merge when new evidence materially improves the existing entry; otherwise mark it already covered.
