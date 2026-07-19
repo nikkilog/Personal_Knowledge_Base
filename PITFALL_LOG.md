@@ -2,7 +2,7 @@
 
 > 用途：记录已经遇到、容易复发、值得跨任务复用的故障与修复经验。
 >
-> 状态：Current 最后更新：2026-07-18
+> 状态：Current 最后更新：2026-07-19
 
 ## 1. 使用规则
 
@@ -617,6 +617,7 @@ credentials 可以刷新 access token，并成功调用 API。
 
 -   Local Kernel 缺少运行依赖；
 -   从桌面或 Finder 启动 VSCode 后读不到终端中的环境变量；
+-   VSCode 界面中选了看似正确的 Python Interpreter，但 Notebook 实际使用的 Jupyter Kernel、metadata 或进程环境并不一致；
 -   误以为每次运行前都需要重新安装依赖。
 
 错误原因：
@@ -627,18 +628,27 @@ credentials 可以刷新 access token，并成功调用 API。
 -   依赖安装；
 -   每个 VSCode 进程的环境变量注入。
 
+同时混淆四个不同层次：
+
+-   Python Interpreter；
+-   Jupyter Kernel / kernelspec；
+-   Notebook metadata 中记录的 Kernel 选择；
+-   VSCode 或 Jupyter 进程实际继承的环境变量。
+
 正确做法：
 
 -   为项目建立专用虚拟环境；
--   让 Jupyter Kernel 指向同一个虚拟环境；
+-   确认真正被选中的 Jupyter kernelspec，并让它指向同一个虚拟环境；
 -   依赖通常每个虚拟环境安装一次；
 -   Local Notebook 缺依赖时快速失败并打印精确安装命令；
 -   需要本地环境变量时，通过本地启动器启动新的 VSCode 进程；
+-   排查时分别核对 Interpreter 路径、kernelspec resource directory、Notebook metadata 和进程环境，不用 UI 中的 Interpreter 选择替代 Kernel 验证；
 -   启动器和 Secret 文件保留在不参与云同步的本地目录。
 
 验收：
 
 -   当前 Kernel 的 Python 路径属于目标虚拟环境；
+-   kernelspec、Notebook metadata 和当前 Kernel 的 Python executable 指向同一套预期环境；
 -   依赖预检通过；
 -   新 VSCode 进程能读取所需 Secret 名称；
 -   Notebook 不在 Local Runtime 中自动安装或修改依赖。
@@ -775,20 +785,20 @@ Notebook 已通过语法或静态编译检查，但正式运行时出现未定�
 -   可观察表现：流程要求位于功能分支，但实际已在主分支且主分支与目标分支指向同一提交；工具仍报告前置条件失败，并跳过可继续执行的只读验证。
 -   根因：流程只定义成功和失败，没有定义“操作前已经处于目标状态”。
 -   错误处理：机械执行重复操作，或因前置状态不符合脚本预期就判失败并停止验证。
--   正确处理：结果必须区分 `ACTION_COMPLETED_NOW`、`ALREADY_IN_DESIRED_STATE` 和 `BLOCKED`。合并场景中，若主分支与目标分支已指向同一提交，判定 `ALREADY_FAST_FORWARDED`，不重复合并但继续验证；若无法 fast-forward，则判定 `BLOCKED`，不自动创建 merge commit、rebase 或 squash。
+-   正确处理：结果必须区分 `ACTION_COMPLETED_NOW`、`ALREADY_IN_DESIRED_STATE` 和 `BLOCKED`。合并场景中，若主分支与目标分支已指向同一提交，判定 `ALREADY_FAST_FORWARDED`，不重复合并但继续验证；若无法 fast-forward，则判定 `BLOCKED`，不自动创建 merge commit、rebase 或 squash。流程、Prompt 或 Skill 更新后，不自动重跑已经完成且已提交的历史工作；只有当重跑会改变真实结论、暴露遗漏或降低现存风险时才重新执行。
 -   验证方式：比较分支引用和 merge-base，检查 HEAD 与工作树，并判断目标结果是否已经实际达到。
--   防复发规则：所有可重复运行的提示词和自动化都必须把“已达成”设计为独立成功状态；状态识别与结果验证不得绑定为同一个开关。
+-   防复发规则：所有可重复运行的提示词和自动化都必须把“已达成”设计为独立成功状态；状态识别与结果验证不得绑定为同一个开关。工具改进只在下一次真实任务中自然验证，除非它确实改变决策、产出或风险。
 
 ## P041｜混淆 Current 身份与验收证据成熟度
 
 -   状态：已确认。
--   问题与适用范围：正式资产的 Current 身份、稳定路径是否落位、Evidence Maturity、用户验收和 Git 冻结是相互关联但不能互相替代的判断；适用于代码、Notebook、数据管道、正式文档、发布资产和外部交付物。
--   可观察表现：新版缺少同等级运行证据就被自动降级；文件一旦标记 Current 就被宣称已验收或冻结；旧版证据被用来证明当前版本；存在成功 Live Run 和用户确认，却无法证明运行对应哪个字节版本；Git 合并或冻结已经完成且工作树干净，但权威项目文档仍保留旧分支、旧 revision、旧 merge 状态或已经失效的 Next Action。
+-   问题与适用范围：正式资产的 Current 身份、稳定路径是否落位、发布位置、Evidence Maturity、用户验收和 Git 冻结是相互关联但不能互相替代的判断；适用于代码、Notebook、数据管道、正式文档、发布资产和外部交付物。
+-   可观察表现：新版缺少同等级运行证据就被自动降级；文件一旦标记 Current 就被宣称已验收或冻结；旧版证据被用来证明当前版本；存在成功 Live Run 和用户确认，却无法证明运行对应哪个字节版本；准备先运行线上验收，之后才确定正式发布或 Runner 的唯一位置；Git 合并或冻结已经完成且工作树干净，但权威项目文档仍保留旧分支、旧 revision、旧 merge 状态或已经失效的 Next Action。
 -   根因：把正式入口治理、稳定路径、运行证据、用户判断、版本控制状态和文档状态压缩成一个状态，或让证据缺少对资产完整 Hash 与内部版本的绑定；误把工作树干净当成所有权威文档已同步最终状态的证明。
--   错误处理：因证据不足撤销已确认的 Current 身份；因 Current、稳定路径或干净工作树存在就宣称 Accepted/Frozen 或全部收口完成；让旧版 evidence 自动继承给新版；把无法绑定 exact Hash 的用户运行说明伪造成仓库 exact-hash evidence；合并后不检查各权威文档中的状态字段和 Next Action。
--   正确处理：Current 身份依次依据用户当前明确确认、项目 `PROJECT.md`、`current/` 稳定路径、已验收的 Git 历史、Current Handoff 和 Index；稳定路径落位单独记录。验收成熟度另按静态检查、测试、Dry Run、Live Run、回读、reconciliation 和 Warning 解释判断，用户验收、Git 冻结和文档状态也分别记录。新版是 Current 但缺少同等级证据时标记 `EVIDENCE_GAP`；旧版 evidence 必须明确绑定旧版。正式运行 manifest 应记录资产内部版本和完整 SHA-256；无法绑定时只保持 `USER_PROVIDED` 或 `USER_CONFIRMED` 等实际证据等级。Git 合并或冻结后，对 PROJECT、Master Plan、Project Handoff、Module Handoff、Document Map 和 Handoff Index 执行定向状态一致性检查，更新仍有效的 branch、revision、merge 状态和 Next Action；工作树干净不能替代该检查。
--   验证方式：分别列出 Current 身份、稳定路径、证据成熟度、用户验收、Git 状态和文档状态；确认每项 evidence 可追溯到对应资产。声称 exact-hash evidence 时，manifest 中的完整 SHA-256 和内部版本必须与被验资产一致。合并或冻结后逐份核对适用的权威文档，确认其中的分支、revision、merge 状态和 Next Action 与最终状态一致，且文档之间不存在冲突。
--   防复发规则：状态模型必须分设正式身份、路径落位、Evidence Maturity、用户验收、Git 冻结和文档状态字段；任何升级、降级、验收或收口结论都逐项核对，不能相互代替。工作树干净只作为 Git 检查结果，不作为多文档状态一致性的替代证据。
+-   错误处理：因证据不足撤销已确认的 Current 身份；因 Current、稳定路径或干净工作树存在就宣称 Accepted/Frozen 或全部收口完成；让旧版 evidence 自动继承给新版；从临时上传、下载目录或未知副本运行，再事后补写正式发布位置；把无法绑定 exact Hash 的用户运行说明伪造成仓库 exact-hash evidence；合并后不检查各权威文档中的状态字段和 Next Action。
+-   正确处理：Current 身份依次依据用户当前明确确认、项目 `PROJECT.md`、`current/` 稳定路径、已验收的 Git 历史、Current Handoff 和 Index；稳定路径落位单独记录。双 Runtime、发布包或共享 Runner 流程应先稳定并提交本地 Current，再复制或覆盖到唯一正式运行位置，从该位置运行并保留证据，即 `Current → Publish → Run → Evidence`。验收成熟度另按静态检查、测试、Dry Run、Live Run、回读、reconciliation 和 Warning 解释判断，用户验收、Git 冻结和文档状态也分别记录。新版是 Current 但缺少同等级证据时标记 `EVIDENCE_GAP`；旧版 evidence 必须明确绑定旧版。正式运行 manifest 应记录资产内部版本和完整 SHA-256；无法绑定时只保持 `USER_PROVIDED` 或 `USER_CONFIRMED` 等实际证据等级。Git 合并或冻结后，对 PROJECT、Master Plan、Project Handoff、Module Handoff、Document Map 和 Handoff Index 执行定向状态一致性检查，更新仍有效的 branch、revision、merge 状态和 Next Action；工作树干净不能替代该检查。
+-   验证方式：分别列出 Current 身份、稳定路径、正式运行位置、证据成熟度、用户验收、Git 状态和文档状态；确认每项 evidence 可追溯到对应资产。声称 exact-hash evidence 时，manifest 中的完整 SHA-256 和内部版本必须与被验资产一致。合并或冻结后逐份核对适用的权威文档，确认其中的分支、revision、merge 状态和 Next Action 与最终状态一致，且文档之间不存在冲突。
+-   防复发规则：状态模型必须分设正式身份、路径落位、发布或运行位置、Evidence Maturity、用户验收、Git 冻结和文档状态字段；任何升级、降级、验收或收口结论都逐项核对，不能相互代替。工作树干净只作为 Git 检查结果，不作为多文档状态一致性的替代证据。
 
 ## P042｜刷新既有 OAuth Token 时擅自扩大授权范围
 
@@ -855,3 +865,14 @@ Notebook 已通过语法或静态编译检查，但正式运行时出现未定�
 -   正确处理：删除前逐项比较完整 Hash、内容语义、Current 身份和预期归档目标，展示 diff、定向变更计划和精确删除范围；无法确认身份时停止并请求用户判断。
 -   验证方式：删除计划能够为每个目标给出完整 Hash、与保留资产的语义关系、Current/Archive 归属和明确去向；未确认项不执行删除。
 -   防复发规则：未跟踪只表示未纳入 Git，不表示可删除；任何清理都必须先完成资产身份审计。
+
+## P048｜Notebook 输出和 metadata 改变完整字节 Hash
+
+-   状态：已确认。
+-   问题与适用范围：使用完整字节 Hash 绑定 Notebook 身份时，`.ipynb` 的输出、execution count、metadata、Kernel 信息和保存动作都会改变文件字节；适用于 Jupyter Notebook、Colab、可执行文档和需要 exact-current evidence 的数据流程。
+-   可观察表现：业务代码没有变化，但运行、清除输出、切换 Kernel 或保存 Notebook 后，完整文件 Hash 与提交时不同；随后难以判断运行证据是否对应当前字节。
+-   根因：把 Notebook 当成纯源码文件，忽略输出、执行计数和 metadata 也是 `.ipynb` JSON 的一部分。
+-   错误处理：把 Hash 不一致直接判定为代码损坏，反复重跑或修改源码；或反过来用运行后的 Hash 证明提交前的 Current。
+-   正确处理：在使用完整字节身份绑定前，先规定 Notebook 输出和 metadata 的处理方式。Current 编辑源应与运行输出分离；必要时使用执行副本、清除临时输出后再提交，或在 manifest 中明确记录运行对应的实际 Notebook 字节身份。历史证据只能证明它绑定的字节，不能自动升级为当前文件证据。
+-   验证方式：比较运行前后完整文件 Hash，并核对代码单元内容、Notebook metadata、Kernel 信息和证据 manifest 中记录的身份是否一致。
+-   防复发规则：凡是声称 Notebook exact-current evidence 的流程，都必须先定义输出、execution count、metadata 和保存动作的处理规则；否则只能标记为较弱证据或 `EVIDENCE_GAP`。
