@@ -2,7 +2,7 @@
 
 > 用途：记录已经遇到、容易复发、值得跨任务复用的故障与修复经验。
 >
-> 状态：Current 最后更新：2026-07-19
+> 状态：Current 最后更新：2026-07-20
 
 ## 1. 使用规则
 
@@ -793,12 +793,12 @@ Notebook 已通过语法或静态编译检查，但正式运行时出现未定�
 
 -   状态：已确认。
 -   问题与适用范围：正式资产的 Current 身份、稳定路径是否落位、发布位置、Evidence Maturity、用户验收和 Git 冻结是相互关联但不能互相替代的判断；适用于代码、Notebook、数据管道、正式文档、发布资产和外部交付物。
--   可观察表现：新版缺少同等级运行证据就被自动降级；文件一旦标记 Current 就被宣称已验收或冻结；旧版证据被用来证明当前版本；存在成功 Live Run 和用户确认，却无法证明运行对应哪个字节版本；准备先运行线上验收，之后才确定正式发布或 Runner 的唯一位置；Git 合并或冻结已经完成且工作树干净，但权威项目文档仍保留旧分支、旧 revision、旧 merge 状态或已经失效的 Next Action。
--   根因：把正式入口治理、稳定路径、运行证据、用户判断、版本控制状态和文档状态压缩成一个状态，或让证据缺少对资产完整 Hash 与内部版本的绑定；误把工作树干净当成所有权威文档已同步最终状态的证明。
--   错误处理：因证据不足撤销已确认的 Current 身份；因 Current、稳定路径或干净工作树存在就宣称 Accepted/Frozen 或全部收口完成；让旧版 evidence 自动继承给新版；从临时上传、下载目录或未知副本运行，再事后补写正式发布位置；把无法绑定 exact Hash 的用户运行说明伪造成仓库 exact-hash evidence；合并后不检查各权威文档中的状态字段和 Next Action。
--   正确处理：Current 身份依次依据用户当前明确确认、项目 `PROJECT.md`、`current/` 稳定路径、已验收的 Git 历史、Current Handoff 和 Index；稳定路径落位单独记录。双 Runtime、发布包或共享 Runner 流程应先稳定并提交本地 Current，再复制或覆盖到唯一正式运行位置，从该位置运行并保留证据，即 `Current → Publish → Run → Evidence`。验收成熟度另按静态检查、测试、Dry Run、Live Run、回读、reconciliation 和 Warning 解释判断，用户验收、Git 冻结和文档状态也分别记录。新版是 Current 但缺少同等级证据时标记 `EVIDENCE_GAP`；旧版 evidence 必须明确绑定旧版。正式运行 manifest 应记录资产内部版本和完整 SHA-256；无法绑定时只保持 `USER_PROVIDED` 或 `USER_CONFIRMED` 等实际证据等级。Git 合并或冻结后，对 PROJECT、Master Plan、Project Handoff、Module Handoff、Document Map 和 Handoff Index 执行定向状态一致性检查，更新仍有效的 branch、revision、merge 状态和 Next Action；工作树干净不能替代该检查。
--   验证方式：分别列出 Current 身份、稳定路径、正式运行位置、证据成熟度、用户验收、Git 状态和文档状态；确认每项 evidence 可追溯到对应资产。声称 exact-hash evidence 时，manifest 中的完整 SHA-256 和内部版本必须与被验资产一致。合并或冻结后逐份核对适用的权威文档，确认其中的分支、revision、merge 状态和 Next Action 与最终状态一致，且文档之间不存在冲突。
--   防复发规则：状态模型必须分设正式身份、路径落位、发布或运行位置、Evidence Maturity、用户验收、Git 冻结和文档状态字段；任何升级、降级、验收或收口结论都逐项核对，不能相互代替。工作树干净只作为 Git 检查结果，不作为多文档状态一致性的替代证据。
+-   可观察表现：新版缺少同等级运行证据就被自动降级；文件一旦标记 Current 就被宣称已验收或冻结；旧版证据被用来证明当前版本；存在成功 Live Run 和用户确认，却无法证明运行对应哪个字节版本；准备先运行线上验收，之后才确定正式发布或 Runner 的唯一位置；源码 Current 与 Runtime 执行副本分离后，调度任务可能继续运行旧副本；文档引用的是未纳入提交范围的 dirty Notebook 字节身份；Git 合并或冻结已经完成且工作树干净，但权威项目文档仍保留旧分支、旧 revision、旧 merge 状态或已经失效的 Next Action。
+-   根因：把正式入口治理、稳定路径、运行证据、用户判断、版本控制状态和文档状态压缩成一个状态，或让证据缺少对资产完整字节身份与内部版本的绑定；为隔离运行或避开后台权限限制而复制执行副本后，没有维护 Current 与 Runtime copy 的刷新规则和证据边界；误把工作树干净当成所有权威文档已同步最终状态的证明。
+-   错误处理：因证据不足撤销已确认的 Current 身份；因 Current、稳定路径或干净工作树存在就宣称 Accepted/Frozen 或全部收口完成；让旧版 evidence 自动继承给新版；修改 Current 后忘记刷新 Runtime copy；用 Runtime 运行结果反向证明源码 Current；只提交文档而不纳入文档声称的实际字节，或用旧证据证明当前 dirty bytes；从临时上传、下载目录或未知副本运行，再事后补写正式发布位置；把无法绑定 exact bytes 的用户运行说明伪造成仓库 exact evidence；合并后不检查各权威文档中的状态字段和 Next Action。
+-   正确处理：Current 身份依次依据用户当前明确确认、项目 `PROJECT.md`、`current/` 稳定路径、已验收的 Git 历史、Current Handoff 和 Index；稳定路径落位单独记录。双 Runtime、发布包、共享 Runner 或本地调度流程应先稳定并提交本地 Current，再复制或覆盖到唯一正式运行位置，从该位置运行并保留证据，即 `Current → Publish/Refresh Runtime → Run → Evidence`。Runtime copy 只作为执行副本，不反向定义源码权威；源码或 runner 更新后必须刷新执行副本。验收成熟度另按静态检查、测试、Dry Run、Live Run、回读、reconciliation 和 Warning 解释判断，用户验收、Git 冻结和文档状态也分别记录。新版是 Current 但缺少同等级证据时标记 `EVIDENCE_GAP`；旧版 evidence 必须明确绑定旧版。文档若声称当前字节已验证，应让提交范围包含对应的已授权源码变化；否则修正文档，避免引用未提交 dirty bytes。正式运行 manifest 应记录资产内部版本和完整 SHA-256；无法绑定时只保持 `USER_PROVIDED` 或 `USER_CONFIRMED` 等实际证据等级。Git 合并或冻结后，对 PROJECT、Master Plan、Project Handoff、Module Handoff、Document Map 和 Handoff Index 执行定向状态一致性检查，更新仍有效的 branch、revision、merge 状态和 Next Action；工作树干净不能替代该检查。
+-   验证方式：分别列出 Current 身份、稳定路径、正式运行位置、证据成熟度、用户验收、Git 状态和文档状态；确认每项 evidence 可追溯到对应资产。使用 Runtime copy 时，核对调度器实际指向的 runner、Notebook、输入输出和日志位置，并比较必要文件与 Current 的同步状态。声称 exact evidence 时，manifest 中的完整 SHA-256 和内部版本必须与被验资产一致。合并或冻结后逐份核对适用的权威文档，确认其中的分支、revision、merge 状态和 Next Action 与最终状态一致，且文档之间不存在冲突。
+-   防复发规则：状态模型必须分设正式身份、路径落位、发布或运行位置、Runtime copy 刷新状态、Evidence Maturity、用户验收、Git 冻结和文档状态字段；任何升级、降级、验收或收口结论都逐项核对，不能相互代替。工作树干净只作为 Git 检查结果，不作为多文档状态一致性的替代证据。
 
 ## P042｜刷新既有 OAuth Token 时擅自扩大授权范围
 
@@ -858,13 +858,13 @@ Notebook 已通过语法或静态编译检查，但正式运行时出现未定�
 ## P047｜把未跟踪文件直接当作垃圾删除
 
 -   状态：已确认。
--   问题与适用范围：项目收口或 Current 整理时发现未跟踪文件、已说明的本轮修改或来源不明的工作树修改，需要判断其是候选、重复资产、历史版本、收口来源、未知风险还是可删除临时文件。
--   可观察表现：仅凭 `git status` 中的 untracked 状态就计划删除，尚未确认它是否承载唯一内容、Current 身份或应归档历史；或把所有 dirty worktree 都视为同一种异常，导致已说明修改也被阻断。
+-   问题与适用范围：项目收口或 Current 整理时发现未跟踪文件、已说明的本轮修改或来源不明的工作树修改，需要判断其是候选、重复资产、历史版本、收口来源、未知风险、运行日志、临时 runner、Notebook 输出噪音，还是可删除临时文件。
+-   可观察表现：仅凭 `git status` 中的 untracked 状态就计划删除，尚未确认它是否承载唯一内容、Current 身份或应归档历史；或把所有 dirty worktree 都视为同一种异常，导致已说明修改也被阻断；项目收口时授权文档、必要代码变更、Notebook metadata/output、运行日志和过时临时脚本混在一起。
 -   根因：把版本控制状态误当成内容价值和资产身份，没有比较完整 Hash、内容语义、Current 依据和归档目标；没有区分已由当前任务说明的修改和来源不明的修改。
--   错误处理：直接批量删除未跟踪文件；只比较文件名或短 Hash；看到近似副本就假定内容相同；为了取得 clean 状态擅自 stash、restore、reset 或覆盖；把已说明修改当作未知风险停止。
--   正确处理：删除前逐项比较完整 Hash、内容语义、Current 身份和预期归档目标，展示 diff、定向变更计划和精确删除范围；已说明修改可以作为收口来源继续只读审计；未知修改才触发停止或 Dirty Worktree Triage；无法确认身份时停止并请求用户判断。
--   验证方式：删除计划能够为每个目标给出完整 Hash、与保留资产的语义关系、Current/Archive 归属和明确去向；未确认项不执行删除；工作树审计能标出每项修改是已说明来源还是未知来源。
--   防复发规则：未跟踪只表示未纳入 Git，不表示可删除；任何清理都必须先完成资产身份审计；不得为了 clean 状态绕过用户确认或语义保全。
+-   错误处理：直接批量删除未跟踪文件；只比较文件名或短 Hash；看到近似副本就假定内容相同；为了取得 clean 状态擅自 stash、restore、reset 或覆盖；直接 `git add .`；把运行日志、临时 runner、Notebook 输出噪音和正式源码改动一起提交；把已说明修改当作未知风险停止。
+-   正确处理：删除前逐项比较完整 Hash、内容语义、Current 身份和预期归档目标，展示 diff、定向变更计划和精确删除范围；已说明修改可以作为收口来源继续只读审计；未知修改才触发停止或 Dirty Worktree Triage；无法确认身份时停止并请求用户判断。收口前先做 dirty worktree disposition audit，将文件分为 stage、keep unstaged、restore、delete、ignore 或 needs confirmation；特别区分 Notebook 源码变化、Notebook 输出/metadata、日志、临时 runner 和文档证据引用。
+-   验证方式：删除计划能够为每个目标给出完整 Hash、与保留资产的语义关系、Current/Archive 归属和明确去向；未确认项不执行删除；工作树审计能标出每项修改是已说明来源还是未知来源。提交前检查 `git status --short`、`git diff --cached --name-status` 和 `git diff --cached --check`，确认 staged 范围只包含授权文件。
+-   防复发规则：未跟踪只表示未纳入 Git，不表示可删除；任何清理都必须先完成资产身份审计；不得为了 clean 状态绕过用户确认或语义保全。项目收口不得默认使用 `git add .`，必须先按职责分桶处理 dirty worktree。
 
 ## P048｜Notebook 输出和 metadata 改变文件身份并污染 Git diff
 
@@ -873,9 +873,9 @@ Notebook 已通过语法或静态编译检查，但正式运行时出现未定�
 -   可观察表现：业务代码没有变化，但运行、清除输出、切换 Kernel 或保存 Notebook 后，完整文件 Hash 与提交时不同；Git diff 主要出现运行输出、执行计数或环境 metadata，随后难以判断运行证据是否对应当前字节，也容易把噪音与正式源码改动一起提交。
 -   根因：把 Notebook 当成纯源码文件，忽略输出、执行计数和 metadata 也是 `.ipynb` JSON 的一部分。
 -   错误处理：把 Hash 不一致直接判定为代码损坏，反复重跑或修改源码；反过来用运行后的 Hash 证明提交前的 Current；或未检查 diff 就把输出和 metadata 噪音与正式代码一起提交。
--   正确处理：在使用完整字节身份绑定前，先规定 Notebook 输出和 metadata 的处理方式。Current 编辑源应与运行输出分离；必要时使用执行副本、清除临时输出后再提交，或在 manifest 中明确记录运行对应的实际 Notebook 字节身份。提交前逐个核对 modified Notebook，只提交授权的源码变化；查看或运行后不需要保留输出时，关闭前不要保存。历史证据只能证明它绑定的字节，不能自动升级为当前文件证据。
--   验证方式：比较运行前后完整文件 Hash，并核对代码单元内容、Notebook metadata、Kernel 信息和证据 manifest 中记录的身份是否一致；提交前检查 Git 状态、diff stat 和目标文件 diff，确认变更文件及内容与授权范围一致。
--   防复发规则：Notebook 项目提交前必须确认每个 modified 文件是否包含真实源码变化；凡是声称 Notebook exact-current evidence 的流程，都必须先定义输出、execution count、metadata 和保存动作的处理规则，否则只能标记为较弱证据或 `EVIDENCE_GAP`。
+-   正确处理：在使用完整字节身份绑定前，先规定 Notebook 输出和 metadata 的处理方式。Current 编辑源应与运行输出分离；必要时使用执行副本、清除临时输出后再提交，或在 manifest 中明确记录运行对应的实际 Notebook 字节身份。提交前逐个核对 modified Notebook，只提交授权的源码变化；查看或运行后不需要保留输出时，关闭前不要保存。历史证据只能证明它绑定的字节，不能自动升级为当前文件证据。文档引用 Notebook 字节身份时，要同步处理文档和 Notebook 的提交边界；不能让文档声称当前字节已验证，却不提交对应的已授权源码变化。
+-   验证方式：比较运行前后完整文件 Hash，并核对代码单元内容、Notebook metadata、Kernel 信息和证据 manifest 中记录的身份是否一致；提交前检查 Git 状态、diff stat 和目标文件 diff，确认变更文件及内容与授权范围一致；核对文档引用、staged 文件、Notebook dirty 状态和提交范围是否一致。
+-   防复发规则：Notebook 项目提交前必须确认每个 modified 文件是否包含真实源码变化；凡是声称 Notebook exact-current evidence 的流程，都必须先定义输出、execution count、metadata 和保存动作的处理规则，否则只能标记为较弱证据或 `EVIDENCE_GAP`。Evidence 成熟度、Current 身份和提交边界必须分开记录并一起核对。
 
 ## P049｜稳定治理规则和动态项目状态混入长期 Prompt 或 Skill
 
@@ -912,3 +912,27 @@ Notebook 已通过语法或静态编译检查，但正式运行时出现未定�
 -   验证方式：代码开始前检查是否已有明确的规则状态、输入输出契约和 QA 门禁。
 -   防复发规则：未满足实现开始条件时，只做规则和设计工作，不编写正式生成器。
 -   适用范围：内容生成器、数据处理脚本、Notebook、Colab 和自动化流程。
+
+## P052｜macOS launchd 后台任务直接访问受保护目录失败
+
+-   状态：已确认。
+-   问题与适用范围：macOS 上使用 `launchd` 定时触发 Notebook、Python、Jupyter nbconvert、本地 ETL、数据同步或其他自动化脚本时，后台进程直接读取用户保护目录下的 cwd、runner、Notebook、输入、输出或日志路径。
+-   可观察表现：手动终端运行成功，但 `launchd` 触发后出现 `PermissionError: Operation not permitted`；脚本或 nbconvert 可以启动，却在 `os.getcwd()`、打开 Notebook 文件、读取输入或写日志时失败。
+-   根因：macOS 对 Documents、Desktop、Downloads 等用户保护目录有额外隐私权限限制；后台调度任务即使通过 shell、Python 或 nbconvert 间接执行，也可能在实际打开受保护目录中的文件时被拦截。只把 cwd 改到非保护目录不足以解决问题，因为被执行器实际读取或写入的文件本体仍可能位于受保护目录。
+-   错误处理：反复给无关应用开启 Full Disk Access；把问题误判为 Secret、Kernel、Notebook 逻辑或路径拼写错误；只执行 `cd /tmp` 或更换 cwd 就认为权限绕行完成；让 `launchd` 继续直接读取受保护目录中的源码 Notebook 或 runner。
+-   正确处理：将定时执行所需的 runner、Notebook 执行副本、输入输出、logs 和 runs 放到非保护目录的本地 Runtime 工作区；`launchd` 指向 Runtime runner；源码 Current 仍由项目仓库维护。排查时同时检查 cwd、script path、notebook path、input path、output path 和 log path，确认执行链中被后台任务实际打开的文件本体都避开受保护目录。
+-   验证方式：手动运行 Runtime runner 通过；`launchd` manual trigger 通过；stderr 没有真实错误；日志出现完整完成标志；nbconvert 命令的实际输入 Notebook 路径来自 Runtime 位置。
+-   防复发规则：macOS 后台调度任务不要把受保护目录作为 cwd，也不要直接执行或读写受保护目录中的依赖文件；优先采用非保护目录 Runtime 执行副本，并记录 Current 与 Runtime copy 的刷新规则和证据边界。
+-   适用范围：macOS `launchd`、Notebook runner、Jupyter nbconvert、Python 脚本、本地 ETL、数据同步和自动化调度任务。
+
+## P053｜Jupyter/nbconvert TCP warning 不等于任务失败
+
+-   状态：已确认。
+-   问题与适用范围：本地 Jupyter、ipykernel 或 nbconvert 执行 Notebook 时出现内核通信 warning；适用于本地 Notebook 自动化、定时执行和命令行执行。
+-   可观察表现：执行日志中出现 `[IPKernelApp] WARNING | Kernel is running over TCP without encryption...`，但 Notebook 仍可能继续执行并产出结果。
+-   根因：这是本地 Jupyter kernel 通信方式相关 warning，不等于 Notebook 业务逻辑、Kernel 启动或 nbconvert 执行失败。
+-   错误处理：看到该 warning 就中断任务或误判失败；反过来只因为 warning 可忽略，就跳过退出状态和输出检查。
+-   正确处理：区分 warning 与 failure；以 Traceback、进程退出状态、executed notebook 是否写出、业务输出是否生成、stderr 是否有真实错误、任务完成标志是否出现作为判断依据。
+-   验证方式：等待执行结束，检查退出状态、Traceback、输出 notebook、业务输出、stderr 和完成标志；只有满足任务验收条件才判定成功。
+-   防复发规则：Notebook 自动化验收不得只看 warning 文本；必须用明确的失败信号和完成证据判断任务状态。
+-   适用范围：本地 Jupyter、ipykernel、nbconvert、Notebook runner 和定时 Notebook 自动化。
