@@ -2,7 +2,7 @@
 
 > 用途：记录已经遇到、容易复发、值得跨任务复用的故障与修复经验。
 >
-> 状态：Current 最后更新：2026-07-20
+> 状态：Current 最后更新：2026-07-23
 
 ## 1. 使用规则
 
@@ -63,12 +63,13 @@
 
 -   状态：已确认。
 -   场景：通过 gspread 或 Sheets API 批量写入比当前 Sheet
-    行列数更大的区域。
+    行列数更大的区域，包括按已有数据计算下一行并追加日志。
 -   错误表现：HTTP 400，常见文本为 `Range exceeds grid limits`；动态区块增加时，也可能在本可扩容的 `columnCount` 检查处提前失败。
--   错在哪里：只按 DataFrame 生成写入 Range，或把 capacity validation 放在 resize 之前，没有按动态布局先计算并扩展目标 Sheet 的 `rowCount` 与 `columnCount`。
--   正确做法：动态布局遵循 `calculate → resize → validate`：先计算包含表头和全部动态区块的所需行列数，不足时 resize 或通过 `batchUpdate` 扩展网格，再校验容量并执行 values update。若是全量替换，先清空目标区域但不要误删 Sheet。
+-   错在哪里：只按 DataFrame 生成写入 Range，或按 `len(existing) + 1`
+    计算 `start_row` 后直接 `worksheet.update()`，没有在写入前检查目标结束行列是否超过 Sheet 的 `rowCount` 与 `columnCount`；也可能把 capacity validation 放在 resize 之前。
+-   正确做法：动态布局遵循 `calculate → resize → validate`：先计算包含表头、全部动态区块或本次追加批次的所需结束行列数；不足时用 `resize()`、`add_rows()` 或 `batchUpdate` 先扩展网格，扩容应留出合理余量，再校验容量并执行 values update。若是全量替换，先清空目标区域但不要误删 Sheet。
 -   验收方式：读取 Sheet
-    properties，确认动态规模增加时会先扩容，网格尺寸不小于计划写入范围；写入后核对实际行列数和最后一个目标单元格。
+    properties，确认动态规模增加或日志追加到现有边界时会先扩容，网格尺寸不小于计划写入范围；写入后核对实际行列数和最后一个目标单元格，并连续追加多批确认不会在下一个边界立即复发。
 
 ### P005｜写完以后回读比对全部 mismatch
 
@@ -936,3 +937,15 @@ Notebook 已通过语法或静态编译检查，但正式运行时出现未定�
 -   验证方式：等待执行结束，检查退出状态、Traceback、输出 notebook、业务输出、stderr 和完成标志；只有满足任务验收条件才判定成功。
 -   防复发规则：Notebook 自动化验收不得只看 warning 文本；必须用明确的失败信号和完成证据判断任务状态。
 -   适用范围：本地 Jupyter、ipykernel、nbconvert、Notebook runner 和定时 Notebook 自动化。
+
+## P054｜同名远程 Python 模块导致旧代码继续运行
+
+-   状态：已确认。
+-   问题与适用范围：Python 模块通过 GitHub raw、Notebook/Colab 下载、远程路径、本地重复下载或 `importlib` 动态加载后，修复版本继续沿用旧文件名；适用于远程模块、Notebook 外部 `.py`、脚本热更新和多 Runtime 工作流。
+-   可观察表现：修复文件已经生成或覆盖，但重新运行后仍出现与旧代码一致的报错；运行输出无法证明当前加载的是新文件还是缓存、旧下载文件或 Runtime 中已有模块对象。
+-   根因：同名交付文件在下载缓存、Notebook 已有本地副本、Python import 缓存、`importlib` 缓存或 `sys.modules` 既有模块对象等层面都可能被复用；缺少模块内版本和实际加载路径输出时，无法区分“修复无效”和“修复根本未被加载”。
+-   错误处理：继续用相同文件名覆盖远程或本地文件，只要求用户重跑调用 Cell；失败后才建议重启 Runtime，但没有版本证据。
+-   正确处理：每次交付这类远程加载的 Python 模块时，默认使用全新版本化文件名；代码内声明可读的模块版本；模块加载或主运行入口打印实际 `__file__`、模块文件名和版本号；Notebook 下载地址、保存路径和加载路径同步改为新文件名。必要时再清理 `sys.modules`、刷新 import 缓存或重启 Runtime。
+-   验证方式：运行模块加载 Cell 后，控制台必须打印预期的新文件名和版本号；检查 `module.__file__` 指向预期文件；执行目标函数时仍输出同一版本，再验证原问题是否消失。
+-   防复发规则：凡是存在远程下载、Notebook 重复运行或动态 import 的 `.py` 修改，不得只覆盖旧文件名并假设新代码已生效；必须执行“新版本化文件名 + 内置版本 + 加载或运行时打印实际文件路径和版本”的组合。
+-   适用范围：GitHub raw 模块、Colab Notebook、本地 Jupyter、`importlib` 动态加载、脚本热更新、双 Runtime 或其他存在缓存和旧模块复用风险的 Python 工作流。
