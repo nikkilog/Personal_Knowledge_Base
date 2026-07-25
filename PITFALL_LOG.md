@@ -723,8 +723,8 @@
 - **根因与常见错误处理**：只按重复率或篇幅压缩，只保留最新状态，没有比较新旧版本的语义，并默认旧内容都已过时；或把 Source Mode 当作候选事实的唯一来源，没有把尚未处置的知识摘要作为跨阶段状态持续传递。
 
   常见错误处理：因为新版更短就直接提交；只运行 Markdown 格式检查或只看 diff stat；看到大量删除却不逐项核对事实；切换窗口或 Source Mode 后丢弃此前已识别的候选，并以当前阶段无法重读原始上下文为由改判无需吸收。
-- **正确处理**：提交前执行只读语义保全审查，将删除内容分类为 `SUPERSEDED_CORRECTLY`、`DUPLICATE_REMOVED`、`HISTORICAL_ONLY`、`MOVED_TO_CORRECT_DOCUMENT`、`VALID_CONTENT_LOST`、`NEEDS_CONFIRMATION` 或 `OUT_OF_SCOPE_CHANGE`。存在 `VALID_CONTENT_LOST` 或 `OUT_OF_SCOPE_CHANGE` 时不得提交，只定向恢复有效内容，不机械恢复整份旧文档。已识别但尚未处置的 PKB 候选必须以 `PKB_SOURCE_SUMMARY` 持续携带，直至明确进入 `ABSORBED_INTO_PKB`、`ALREADY_COVERED_IN_PKB`、`USER_DECLINED` 或 `INVALIDATED_WITH_REASON` 之一。
-- **验证与防复发**：比较 HEAD 与工作树版本，逐项核对运行、配置、风险、故障、验收和停止条件，再运行 `git diff --check`；跨阶段流程还应逐项核对 `PKB_SOURCE_SUMMARY` 中的候选及其最终处置状态，确保没有无理由消失或改判。
+- **正确处理**：提交前执行只读语义保全审查，将删除内容分类为 `SUPERSEDED_CORRECTLY`、`DUPLICATE_REMOVED`、`HISTORICAL_ONLY`、`MOVED_TO_CORRECT_DOCUMENT`、`VALID_CONTENT_LOST`、`NEEDS_CONFIRMATION` 或 `OUT_OF_SCOPE_CHANGE`。存在 `VALID_CONTENT_LOST` 或 `OUT_OF_SCOPE_CHANGE` 时不得提交，只定向恢复有效内容，不机械恢复整份旧文档。owner 职责迁移时，源文件中的相应删除和目标 owner 的完整承载必须同时进入获批 staged scope，不能只提交迁移的一侧。已识别但尚未处置的 PKB 候选必须以 `PKB_SOURCE_SUMMARY` 持续携带，直至明确进入 `ABSORBED_INTO_PKB`、`ALREADY_COVERED_IN_PKB`、`USER_DECLINED` 或 `INVALIDATED_WITH_REASON` 之一。
+- **验证与防复发**：比较 HEAD 与工作树版本，逐项核对运行、配置、风险、故障、验收和停止条件，再运行 `git diff --check`；职责迁移还必须检查源文件删除、目标 owner 承载和 staged scope 同时完整，并明确确认 `VALID_CONTENT_LOST: NO`；跨阶段流程还应逐项核对 `PKB_SOURCE_SUMMARY` 中的候选及其最终处置状态，确保没有无理由消失或改判。
 
   防复发：关键文档出现高删除比例、整体重写、职责变化、大量迁移，运行、排障、验收、停止条件被压缩，或知识吸收流程切换阶段、窗口、Source Mode 时，语义保全审查是提交或结束流程的门禁。
 
@@ -762,8 +762,8 @@
 - **根因与常见错误处理**：把版本控制状态误当成内容价值和资产身份，没有比较完整 Hash、内容语义、Current 依据和归档目标；没有区分已由当前任务说明的修改和来源不明的修改。
 
   常见错误处理：直接批量删除未跟踪文件；只比较文件名或短 Hash；看到近似副本就假定内容相同；为了取得 clean 状态擅自 stash、restore、reset 或覆盖；直接 `git add .`；把运行日志、临时 runner、Notebook 输出噪音和正式源码改动一起提交；把已说明修改当作未知风险停止。
-- **正确处理**：删除前逐项比较完整 Hash、内容语义、Current 身份和预期归档目标，展示 diff、定向变更计划和精确删除范围；已说明修改可以作为收口来源继续只读审计；未知修改才触发停止或 Dirty Worktree Triage；无法确认身份时停止并请求用户判断。收口前先做 dirty worktree disposition audit，将文件分为 stage、keep unstaged、restore、delete、ignore 或 needs confirmation；特别区分 Notebook 源码变化、Notebook 输出/metadata、日志、临时 runner 和文档证据引用。
-- **验证与防复发**：删除计划能够为每个目标给出完整 Hash、与保留资产的语义关系、Current/Archive 归属和明确去向；未确认项不执行删除；工作树审计能标出每项修改是已说明来源还是未知来源。提交前检查 `git status --short`、`git diff --cached --name-status` 和 `git diff --cached --check`，确认 staged 范围只包含授权文件。
+- **正确处理**：删除前逐项比较完整 Hash、内容语义、Current 身份和预期归档目标，展示 diff、定向变更计划和精确删除范围；已说明修改可以作为收口来源继续只读审计；未知修改才触发停止或 Dirty Worktree Triage；无法确认身份时停止并请求用户判断。收口前先做 dirty worktree disposition audit，将文件分为 stage、keep unstaged、restore、delete、ignore 或 needs confirmation；特别区分 Notebook 源码变化、Notebook 输出/metadata、日志、临时 runner 和文档证据引用。与限定范围任务无关的历史 staged 修改不应自动阻塞任务，也不得被取消暂存、覆盖或改写；保持其原状，仅重新 stage 本次获批路径，并使用限定路径提交或等价隔离方式，避免把无关内容混入本次提交。
+- **验证与防复发**：删除计划能够为每个目标给出完整 Hash、与保留资产的语义关系、Current/Archive 归属和明确去向；未确认项不执行删除；工作树审计能标出每项修改是已说明来源还是未知来源。提交前检查 `git status --short`、`git diff --cached --name-status` 和 `git diff --cached --check`，核对本次提交的 staged scope 与获批路径一致；如存在无关历史 staged 内容，还要确认其保持原状且限定路径提交或等价隔离不会将其纳入。
 
   防复发：未跟踪只表示未纳入 Git，不表示可删除；任何清理都必须先完成资产身份审计；不得为了 clean 状态绕过用户确认或语义保全。项目收口不得默认使用 `git add .`，必须先按职责分桶处理 dirty worktree。
 
@@ -796,6 +796,17 @@
 - **验证与防复发**：代码开始前检查是否已有明确的规则状态、输入输出契约和 QA 门禁。
 
   防复发：未满足实现开始条件时，只做规则和设计工作，不编写正式生成器。
+
+### P061｜治理目录缺少独立 Git 边界导致门禁无法执行
+
+- **状态**：已确认
+- **问题与适用范围**：独立治理目录需要运行依赖 Git branch、HEAD、commit 和 clean worktree 的治理 Skill，但该目录自身没有 Git；适用于与其他仓库并列或包含多个独立嵌套仓库的治理目录。
+- **可观察表现**：治理 Skill 无法确定该目录自身的 branch、HEAD、提交历史或 clean worktree，因而不能通过 Git gate；若在更高层总目录初始化 Git，又会把多个原本独立的仓库纳入同一边界。
+- **根因与常见错误处理**：治理流程依赖可验证的本地版本边界，但目标治理目录未建立自身 Git；常见错误处理是在包含多个独立仓库的总根目录初始化一个总 Git，造成职责、状态和提交范围混杂。
+- **正确处理**：仅为需要治理门禁的独立治理目录建立自身 Git 边界，保持其他独立仓库及更高层总目录不变；不得为满足门禁而在包含多个嵌套仓库的总根目录初始化总 Git。
+- **验证与防复发**：从治理目录内核对 Git root 正好等于该目录，并确认 branch、HEAD、提交历史和 worktree 状态均可独立读取；再从更高层确认没有新增覆盖多个独立仓库的总 Git。
+
+  防复发：建立需要 Git gate 的治理目录时，应同步确认其独立版本边界；Git root 必须与治理职责边界一致。
 
 
 ## 7. 网络与运行环境
