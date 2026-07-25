@@ -1,46 +1,92 @@
-# Source Package Contract
+# PKB Source Package Contract — Standalone Chat Review
+
+## Schema
+
+Package-based modes require:
+
+```text
+PACKAGE_SCHEMA_VERSION:
+1
+```
+
+Unknown or missing versions must return `BLOCKED`. Do not guess compatibility.
 
 ## Purpose
 
-A PKB task started after project closeout may not have access to the earlier project thread. The source package must therefore be self-contained enough to classify durable knowledge without reopening or reinterpreting the source project.
+A new PKB task may not have access to the earlier Chat window, Project, or Codex task. The package must be self-contained enough to classify durable knowledge without reopening or reinterpreting the source conversation.
+
+A Source Package is a transport format, not independent evidence.
+
+## `CHAT_WINDOW_REVIEW`
+
+This is the default mode for the PKB Bridge Prompt and can be used after **any Chat window**.
+
+Require:
+
+```text
+PKB_ABSORPTION_RECOMMENDED:
+YES
+```
+
+The package should contain:
+
+- minimum Chat-window background;
+- optional project or closeout background, or `NONE`;
+- Personal Context candidates;
+- Pitfall candidates;
+- PKB operating-rule candidates;
+- possible existing coverage;
+- topic-specific or project-specific details to strip;
+- content explicitly excluded from PKB;
+- fact levels and uncertainties.
+
+This mode must not require:
+
+- a Project;
+- Project Closeout;
+- `PKB_SYNC_REQUIRED`;
+- source-project branch, commit, Hash, or clean-worktree evidence.
+
+If the Bridge Prompt finds no eligible durable candidate, it must output `NO_PKB_ACTION_REQUIRED` and must not create a package.
 
 ## `PROJECT_CLOSEOUT_PACKAGE`
 
+This optional compatibility mode is used when a Project Closeout Skill directly generates the PKB call package.
+
+Require an explicit:
+
+```text
+PKB_SYNC_REQUIRED:
+YES
+```
+
+If `NO`, perform no PKB action. If missing or ambiguous, block only in this source mode.
+
 The package should contain, where applicable:
 
-- source project or workstream name;
-- project closeout summary;
-- files updated and their responsibilities;
-- current project phase;
-- current authoritative code, notebook, scripts, and documents;
-- superseded artifacts or decisions not to reopen;
-- project-specific pitfalls already preserved in the source project;
-- candidate cross-project preferences and reusable pitfalls;
-- unresolved items that remain project-only;
-- branch, commit, and clean-worktree evidence;
-- confirmation that no cloud publication or cross-repository modification occurred.
+- minimum source project or workstream background;
+- closeout result and why the work changed;
+- evidence that the source project preserved its own Current state;
+- local branch/commit/clean-worktree evidence;
+- Personal Context candidates;
+- Pitfall candidates;
+- PKB operating-rule candidates;
+- possible existing coverage;
+- project-specific details that must be stripped;
+- items that must remain in the source project;
+- fact levels and uncertainties.
 
-The package may be pasted text, a user-provided file, or a local file explicitly supplied through `SOURCE_FILE`.
-
-## Source Sufficiency
-
-A source is sufficient when PKB can determine:
-
-1. what durable behavior or lesson is being proposed;
-2. what real evidence supports it;
-3. whether it is project-only or cross-project;
-4. whether the source project has already preserved its own current state;
-5. whether the source project is closed and clean.
-
-Do not request full project history when a verified closeout report is sufficient.
-
-## `CURRENT_CODEX_THREAD`
-
-Use only when the current task actually includes the relevant project work and closeout evidence. Never assume access to an earlier task or hidden Codex thread.
+Project Closeout is a convenience source, not the universal PKB entry point.
 
 ## `USER_PROVIDED_SOURCE_PACKAGE`
 
-Use for user-supplied knowledge that is not necessarily tied to a project closeout, such as a web research package, a pasted operating principle, or a manually assembled set of incidents.
+Use for user-supplied durable knowledge not necessarily tied to a Chat review or Project Closeout, such as a pasted operating principle, research package, or manually assembled incident set.
+
+Do not require project-closeout evidence unless the package relies on a source repository.
+
+## `CURRENT_CODEX_THREAD`
+
+Use only when the current Codex task actually includes the relevant work and evidence. Never assume access to an earlier task or hidden thread.
 
 ## `LOCAL_SOURCE_FILE`
 
@@ -48,4 +94,30 @@ Use only the explicitly supplied local file. Do not browse neighboring project f
 
 ## `REPOSITORY_ONLY`
 
-Use only to audit the current PKB for duplication, structure, or already-covered knowledge. It does not authorize inventing source evidence for new preferences or pitfalls.
+Use only to audit current PKB structure, ownership, duplication, or existing coverage. It does not authorize inventing source evidence.
+
+## Fact Levels
+
+Use:
+
+- `USER_CONFIRMED`
+- `USER_PROVIDED`
+- `OBSERVED_WORKFLOW`
+- `INFERENCE`
+- `NEEDS_CONFIRMATION`
+
+Only `USER_CONFIRMED`, `USER_PROVIDED`, or a concretely evidenced `OBSERVED_WORKFLOW` may become formal candidates.
+
+`INFERENCE` and `NEEDS_CONFIRMATION` may be reported but must not be written into PKB.
+
+## Source Sufficiency
+
+A source is sufficient when each candidate can be judged on:
+
+1. the durable behavior, preference, operating rule, or lesson proposed;
+2. the real evidence supporting it;
+3. whether it is durable, project-only, temporary, or general-information-only;
+4. the likely owner file;
+5. material uncertainty or privacy boundary.
+
+Only `PROJECT_CLOSEOUT_PACKAGE` additionally requires source-project closeout and clean-worktree evidence.

@@ -1,0 +1,4 @@
+interface:
+  display_name: "PKB Knowledge Absorption"
+  short_description: "Review durable knowledge from any Chat window and absorb approved items into PKB"
+  default_prompt: "Use $pkb-knowledge-absorption to independently review a Chat-window or other source package, route and deduplicate durable personal context and verified reusable pitfalls, validate privacy and repository boundaries, and commit approved PKB-only changes without requiring Project Closeout."

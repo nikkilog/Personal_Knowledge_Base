@@ -1,91 +1,121 @@
 ---
 name: pkb-knowledge-absorption
-description: Absorb durable preferences, reusable pitfalls, and PKB operating rules into Personal_Knowledge_Base only after the source project has completed its own documentation and local Git closeout. Deduplicate, abstract, preserve semantics, validate privacy and ownership boundaries, and close the PKB change independently in local Git. Do not use this Skill to modify business-project files, replace project handoff documentation, record one-off project state, synchronize Workspace_Control, publish to cloud services, or merely answer questions about existing preferences or pitfalls.
+description: Independently review durable knowledge from any Chat window, project closeout package, user-provided source package, local source file, current Codex thread, or PKB repository audit. Route stable personal context, reusable working methods, verified cross-project pitfalls, and PKB-local operating rules into one authoritative owner; deduplicate before writing; remove project-only and temporary details; preserve semantics; validate privacy and repository boundaries; and close approved PKB changes independently in local Git. Do not require Project Closeout for chat-window review. Do not modify source projects or Workspace_Control, record temporary state, push, publish, or cloud-sync.
 ---
 
 # PKB Knowledge Absorption
 
-## Purpose
+## 1. Purpose
 
-Identify durable personal working preferences, reusable verified pitfalls, and PKB-local operating rules; deduplicate them against the current Personal_Knowledge_Base; remove one-off project details; update the single authoritative owner file; validate semantic preservation, privacy, and repository boundaries; and close the PKB change independently in local Git.
+Use this Skill to turn a self-contained source package or PKB repository audit into a small, durable, non-duplicative PKB update.
 
-This Skill is the second closeout step. It does not replace source-project documentation.
+PKB Knowledge Absorption is an **independent capability**. It may run after any Chat window, whether or not that window belongs to a Project and whether or not Project Closeout has occurred.
 
-## Core Operating Intent
+The Skill must:
 
-The source project must first explain its own logic and current state. Typical source-project closeout should make clear:
+1. verify the PKB repository and source mode;
+2. route each candidate to one authoritative owner;
+3. check existing coverage before drafting;
+4. keep temporary, project-only, and unsupported details out of PKB;
+5. propose one bounded execution package;
+6. write only after the selected execution mode authorizes it;
+7. validate and, when authorized, commit the PKB independently.
 
-- what the project is and why it is designed that way;
-- the current rules and execution steps;
-- what is complete, what is current, and what happens next;
-- which code, notebook, script, and document is currently authoritative;
-- which old artifacts are superseded and must not be treated as Current;
-- project-specific pitfalls and decisions that must not be reopened;
-- the validated local Git closeout state.
+PKB does not replace source-project documentation, and Project Closeout is not a prerequisite for general chat-window absorption.
 
-PKB then absorbs only the cross-project durable lessons. Do not move project handoff duties into PKB.
+## 2. Inputs
 
-## Required Inputs
-
-- `TARGET_REPO_PATH`: Personal_Knowledge_Base repository path. If omitted, resolve from the current Git root and block if it is not clearly the PKB.
+- `PACKAGE_SCHEMA_VERSION`: required for package-based modes; supported value: `1`.
+- `TARGET_REPO_PATH`: PKB repository path. If omitted, resolve from the current Git root and block if the repository is not clearly the PKB.
 - `EXPECTED_BRANCH`: expected PKB branch; default `main`.
 - `EXPECTED_DIRTY_FILES`: expected pre-existing PKB modifications; default `NONE`.
-- `SOURCE_MODE`: `PROJECT_CLOSEOUT_PACKAGE` (default), `CURRENT_CODEX_THREAD`, `USER_PROVIDED_SOURCE_PACKAGE`, `LOCAL_SOURCE_FILE`, or `REPOSITORY_ONLY`.
-- `SOURCE_PACKAGE`: required for `PROJECT_CLOSEOUT_PACKAGE` and `USER_PROVIDED_SOURCE_PACKAGE`; block if missing.
-- `SOURCE_FILE`: required for `LOCAL_SOURCE_FILE`; block if missing.
+- `SOURCE_MODE`:
+  - `CHAT_WINDOW_REVIEW` (default)
+  - `PROJECT_CLOSEOUT_PACKAGE`
+  - `CURRENT_CODEX_THREAD`
+  - `USER_PROVIDED_SOURCE_PACKAGE`
+  - `LOCAL_SOURCE_FILE`
+  - `REPOSITORY_ONLY`
+- `SOURCE_PACKAGE`: required for `CHAT_WINDOW_REVIEW`, `PROJECT_CLOSEOUT_PACKAGE`, and `USER_PROVIDED_SOURCE_PACKAGE`.
+- `SOURCE_FILE`: required for `LOCAL_SOURCE_FILE`.
 - `KNOWLEDGE_FOCUS`: `PERSONAL_CONTEXT`, `PITFALLS`, `PKB_OPERATING_RULES`, or `ALL` (default).
 - `EXECUTION_MODE`: `AUDIT_ONLY`, `AUDIT_THEN_CONFIRM` (default), or `DIRECT_EXECUTE_AFTER_SAFE_GATE`.
 - `COMMIT_MODE`: `NO_COMMIT` (default) or `COMMIT_AFTER_VALIDATION`.
 
-Read [Source package contract](references/source-package-contract.md) before using any non-repository source.
+Unknown parameter names, unsupported enum values, or unsupported package schema versions must return `BLOCKED`. Do not guess aliases such as `PKB_COMMIT_MODE`.
 
-## Mandatory Closeout Order
+Read [Source package contract](references/source-package-contract.md) for non-repository sources.
 
-Always follow this order:
+## 3. Source-mode Gates
 
-1. Complete the source project's own documentation closeout.
-2. Identify the source project's current authoritative files and current valid code.
-3. Resolve or explicitly classify superseded project artifacts.
-4. Validate and commit the source project locally.
-5. Confirm the source project worktree is clean.
-6. Start a separate PKB task.
-7. Absorb only durable cross-project knowledge into PKB.
-8. Validate and commit the PKB independently.
+### `CHAT_WINDOW_REVIEW`
 
-Do not use the same task to modify both the source project and PKB.
+This is the default independent mode.
 
-## Repository Gate
+Require:
+
+- `PKB_ABSORPTION_RECOMMENDED: YES`;
+- a self-contained minimum summary of the Chat window;
+- at least one candidate with a supported fact level;
+- explicit exclusions for temporary, project-only, sensitive, or unsupported content;
+- candidate-level fact levels and uncertainties.
+
+Do **not** require:
+
+- a Project;
+- Project Closeout;
+- `PKB_SYNC_REQUIRED`;
+- source-project branch, commit, or clean-worktree evidence.
+
+A project or closeout result may be included as optional context. It does not become a gate.
+
+If the source package contains no eligible candidate after local PKB deduplication and routing, return `ALREADY_IN_DESIRED_STATE`; do not create an empty commit.
+
+### `PROJECT_CLOSEOUT_PACKAGE`
+
+Require:
+
+- `PKB_SYNC_REQUIRED: YES` or an equivalent explicit project-closeout instruction;
+- a self-contained project closeout summary;
+- enough evidence that the source project preserved its own Current state;
+- local closeout and clean-worktree evidence;
+- candidate durable knowledge and project-only exclusions.
+
+This mode is only a convenience path from Project Closeout. It is not required for `CHAT_WINDOW_REVIEW`.
+
+If the package says `PKB_SYNC_REQUIRED: NO`, return `ALREADY_IN_DESIRED_STATE` with no PKB modification.
+
+If the field is missing or ambiguous in this specific mode, return `BLOCKED` and request only the missing status.
+
+### `CURRENT_CODEX_THREAD`
+
+Use only when the current Codex task actually contains the source work and evidence. Do not assume access to an earlier task or hidden thread.
+
+### `USER_PROVIDED_SOURCE_PACKAGE`
+
+Use for user-supplied durable knowledge not necessarily tied to a project closeout. Do not impose project branch or clean-worktree requirements unless the package itself depends on a source repository.
+
+### `LOCAL_SOURCE_FILE`
+
+Read only the explicitly supplied source file unless the user separately authorizes broader source access.
+
+### `REPOSITORY_ONLY`
+
+Audit the current PKB for structure, ownership, duplication, or already-covered knowledge. Do not invent new source evidence.
+
+## 4. Repository Gate
 
 Before any write:
 
-1. verify `pwd` and Git root;
-2. verify the repository is Personal_Knowledge_Base;
-3. verify branch and HEAD;
-4. run `git status --short`;
-5. compare actual changes with `EXPECTED_DIRTY_FILES`;
-6. stop on unexplained modifications, conflicts, or deletions;
-7. confirm every source project represented in the source package has already been locally committed or otherwise explicitly closed with a clean worktree.
+1. verify `pwd`, Git root, repository identity, branch, and HEAD;
+2. run `git status --short`;
+3. compare actual changes with `EXPECTED_DIRTY_FILES`;
+4. stop on unexplained modifications, conflicts, or deletions;
+5. read the repository's `AGENTS.md` before applying this Skill.
 
 Never stash, reset, restore, checkout, overwrite, or silently absorb around a failed gate.
 
-## Source Completeness Gate
-
-Do not assume a new Codex task can access an earlier Codex thread.
-
-For `PROJECT_CLOSEOUT_PACKAGE`, require enough evidence to understand:
-
-- the source project or workstream;
-- what changed and why;
-- the project closeout result;
-- current branch and clean-worktree evidence;
-- candidate durable preferences or reusable pitfalls;
-- unresolved items that must remain project-only.
-
-If the source is incomplete, return `BLOCKED` and request only the missing package or closeout evidence.
-
-`CURRENT_CODEX_THREAD` is allowed only when the current task actually contains the relevant source work. Do not use it merely because it is the easiest default.
-
-## Sources to Read
+## 5. Sources to Read
 
 Always read:
 
@@ -94,58 +124,30 @@ Always read:
 - `PERSONAL_CONTEXT.md`
 - `PITFALL_LOG.md`
 
-Read the source package, source file, current Codex thread, and relevant Git history only as required by `SOURCE_MODE` and the audit. Avoid `archive/` unless traceability is necessary.
+Read only the references required by the candidate types:
 
-Read all references before classifying or executing:
+- always: [Knowledge routing](references/knowledge-routing.md) and [Privacy and deduplication](references/privacy-and-dedup.md);
+- package-based source: [Source package contract](references/source-package-contract.md);
+- Pitfall candidate: [Pitfall quality](references/pitfall-quality.md);
+- reporting: [Report contract](references/report-contract.md).
 
-- [Source package contract](references/source-package-contract.md)
-- [Knowledge routing](references/knowledge-routing.md)
-- [Privacy and deduplication](references/privacy-and-dedup.md)
-- [Pitfall quality](references/pitfall-quality.md)
-- [Report contract](references/report-contract.md)
+Avoid `archive/` unless traceability is necessary.
 
-## Authoritative File Responsibilities
+## 6. Owner Routing Comes First
 
-### `PERSONAL_CONTEXT.md`
+Classify every detailed candidate before drafting.
 
-Store durable working, communication, output, acceptance, Codex-collaboration, project-management, and cross-project work preferences.
-
-Do not store one-off project state, current branch, commit, run ID, resource ID, project version, or project next step.
-
-### `PITFALL_LOG.md`
-
-Store verified reusable incidents with an observable symptom, root cause, wrong handling, correct handling, verification, prevention, and applicability.
-
-Do not store unverified worries or vague reminders.
-
-### `AGENTS.md`
-
-Store only PKB-local operating rules: privacy, local-only boundaries, deduplication, file responsibility, Git, archive handling, and safe execution.
-
-Do not store ordinary personal preferences.
-
-### `PROJECT.md`
-
-Store only the PKB's own purpose, Current files, status, Current Focus, maintenance workflow, and local-only boundary.
-
-Do not store business-project state.
-
-### `archive/`
-
-Use only for a fully retired knowledge asset with independent traceability value that Git history alone cannot express. Routine edits, merges, and deduplication must not create Archive copies.
-
-## Knowledge Classification
-
-Each detailed candidate must have exactly one type:
+Use exactly one knowledge type:
 
 - `PERSONAL_CONTEXT`
 - `PITFALL`
 - `PKB_OPERATING_RULE`
 - `PROJECT_ONLY`
 - `WORKSPACE_RULE`
+- `GENERAL_INFORMATION_ONLY`
 - `NO_ACTION`
 
-Each candidate must have exactly one recommended action:
+Use exactly one recommended action:
 
 - `MERGE_INTO_EXISTING_ENTRY`
 - `UPDATE_EXISTING`
@@ -153,99 +155,134 @@ Each candidate must have exactly one recommended action:
 - `ALREADY_COVERED`
 - `KEEP_IN_PROJECT_ONLY`
 - `UPDATE_WORKSPACE_CONTROL_SEPARATELY`
+- `GENERAL_INFORMATION_NO_PKB_WRITE`
 - `NO_ACTION`
 
-Prefer existing authoritative entries. Do not write the same detailed knowledge into multiple files.
+Prefer, in order:
 
-## Durable Collaboration Preference Check
+1. `MERGE_INTO_EXISTING_ENTRY`
+2. `UPDATE_EXISTING`
+3. `CREATE_NEW_ENTRY`
 
-When supported by the source, evaluate whether the PKB already captures these durable collaboration preferences:
+Do not write the same detailed knowledge into more than one owner file. Use only a short cross-reference when necessary.
 
-- Codex is used primarily to preserve local project maintainability, not merely to generate code.
-- Project documentation should explain project purpose, design logic, rules, steps, current progress, current valid artifacts, pitfalls, and the next action.
-- New people or AI should not need to reread long chat history or guess which file is current.
-- Current authoritative code and documents must be unique and explicit.
-- Superseded code and outputs without continuing value should not remain as Current execution entry points.
-- Candidate deletions should be listed for user confirmation; when useful, the user may provide screenshots or a file list before deletion is authorized.
-- Project-specific knowledge remains in the project; only cross-project durable knowledge enters PKB.
+Reviewing every Chat window does not mean storing every answer. Ordinary general information without durable user-specific, operational, or verified Pitfall value is `GENERAL_INFORMATION_ONLY`.
 
-Merge these into existing entries when already partially covered. Do not recreate them on every run.
+## 7. Candidate-level Decisions
 
-## Two-phase Default
+Evaluate candidates independently.
 
-For `AUDIT_THEN_CONFIRM`, phase one is read-only. Perform identification, deduplication, ownership classification, semantic-preservation planning, and preparation of one unique recommended execution package. Do not modify, delete, stage, or commit.
+A candidate with incomplete evidence may be marked `NEEDS_CONFIRMATION`, `PROJECT_ONLY`, `GENERAL_INFORMATION_ONLY`, or `NO_ACTION` without blocking other valid candidates.
 
-After explicit user confirmation, modify only approved files and approved entries, validate them, show the diff summary, and commit only when `COMMIT_MODE` is `COMMIT_AFTER_VALIDATION`.
+Block the whole task only for a failed global gate, such as:
 
-For `AUDIT_ONLY`, never write or commit.
+- wrong or unsafe PKB repository;
+- unknown PKB worktree changes;
+- missing required source package;
+- unresolved privacy or authorization issue;
+- unsupported package schema;
+- source-project closeout failure in `PROJECT_CLOSEOUT_PACKAGE` mode only.
 
-For `DIRECT_EXECUTE_AFTER_SAFE_GATE`, write only after every repository, source, privacy, deletion, and scope gate passes and the request explicitly authorizes direct execution.
+A Source Package is a transport format, not independent evidence. Its fact level comes from the underlying user statement or observed workflow, not from the confidence of the summary wording.
 
-## Deletion and Semantic Preservation Gate
+## 8. Authoritative Owners
 
-Do not delete or substantially rewrite existing PKB knowledge merely because it appears old or verbose.
+- `AGENTS.md`: mandatory PKB-local operating, privacy, file-responsibility, deduplication, archive, validation, and Git rules.
+- `PROJECT.md`: the PKB repository's own purpose, Current files, status, and maintenance entry point.
+- `PERSONAL_CONTEXT.md`: durable personal background, work preferences, communication preferences, output and acceptance habits, reusable collaboration methods, and cross-project operating preferences.
+- `PITFALL_LOG.md`: incidents that actually occurred and have a reusable trigger, observable symptom, sufficiently established cause, correct handling, and verification.
+- `archive/`: fully retired knowledge assets with independent traceability value that Git history alone cannot express.
 
-Before deleting, compressing, merging, or archiving existing content:
+Personal preferences do not authorize deletion, destructive overwrite, cross-repository modification, commit, push, publication, cloud synchronization, or writing unconfirmed personal information.
 
-1. identify the exact entry or file;
-2. state why it is superseded, duplicated, or being merged;
-3. identify where the surviving knowledge will live;
-4. request explicit confirmation when the change removes or materially rewrites existing knowledge;
-5. when practical, let the user confirm from a screenshot or concrete file/entry list;
-6. classify every removed block as:
-   - `SUPERSEDED_CORRECTLY`
-   - `DUPLICATE_REMOVED`
-   - `MERGED_INTO_EXISTING`
-   - `VALID_CONTENT_LOST`
-   - `NEEDS_CONFIRMATION`
+## 9. Two-phase Default
 
-If any content is `VALID_CONTENT_LOST`, do not commit. If any content is `NEEDS_CONFIRMATION`, stop and request the single necessary decision.
+### `AUDIT_ONLY`
 
-## Cross-repo Boundary
+Read, classify, deduplicate, and report. Never write, stage, or commit.
 
-Never modify a source project, CAH, Workspace_Control, another repository, or any cloud resource.
+### `AUDIT_THEN_CONFIRM`
 
-Classify cross-project engineering governance as `WORKSPACE_RULE` and report only:
+Phase one is read-only. Return:
 
-`WORKSPACE_RULE_FOLLOW_UP_REQUIRED: YES` or `NO`.
+- repository gate result;
+- existing coverage;
+- candidate decisions;
+- one bounded execution package;
+- no-action items.
 
-Do not update Workspace_Control directly.
+Do not modify, delete, stage, or commit.
 
-## Validation Before Commit
+After explicit confirmation, modify only approved files and entries. Commit only when `COMMIT_MODE` is `COMMIT_AFTER_VALIDATION`.
 
-After approved edits:
+### `DIRECT_EXECUTE_AFTER_SAFE_GATE`
 
-1. run `git diff --check`;
-2. show `git status --short`;
-3. show `git diff --stat`;
-4. verify only approved files changed;
-5. verify no project-only state entered PKB;
-6. verify no ordinary personal preference entered PKB `AGENTS.md`;
-7. verify no duplicate detailed knowledge was created;
-8. verify no Secret value or inferred sensitive attribute was added;
-9. verify semantic preservation classifications contain no `VALID_CONTENT_LOST`;
-10. create no empty commit.
+Use only when the user explicitly authorizes direct execution and every repository, source, privacy, deletion, and scope gate passes.
 
-## Result States
+## 10. Semantic Preservation
+
+Routine merges and wording improvements do not require a heavy audit. A detailed semantic-preservation review is required when the change includes:
+
+- substantial deletion or compression;
+- cross-file movement;
+- Pitfall merge or retirement;
+- Archive movement;
+- responsibility or structure changes.
+
+Use these outcomes where applicable:
+
+- `SUPERSEDED_CORRECTLY`
+- `DUPLICATE_REMOVED`
+- `MERGED_INTO_EXISTING`
+- `MOVED_TO_CORRECT_DOCUMENT`
+- `HISTORICAL_ONLY`
+- `VALID_CONTENT_LOST`
+- `NEEDS_CONFIRMATION`
+- `OUT_OF_SCOPE_CHANGE`
+
+Do not commit when `VALID_CONTENT_LOST` or `OUT_OF_SCOPE_CHANGE` exists. Stop only on the exact unresolved decision when `NEEDS_CONFIRMATION` exists.
+
+Pitfall numbers are permanent. A merged or superseded Pitfall keeps its number as a short redirect; numbers are never reassigned.
+
+## 11. Validation Before Commit
+
+After approved edits, perform the smallest validation set that proves correctness:
+
+1. confirm every change is in the correct owner file;
+2. confirm no synonymous duplicate was created;
+3. confirm no project-only, temporary, rapidly changing, or general-information-only content entered PKB;
+4. confirm no Secret value or unconfirmed sensitive inference was added;
+5. confirm cross-file moves have one surviving owner;
+6. run `git diff --check`;
+7. inspect `git status --short` and `git diff --stat`;
+8. confirm only approved files changed;
+9. create no empty commit.
+
+Use full hashes, byte-level manifests, or exact-runtime evidence only when the task claims exact file identity, Current-to-Runtime equality, or evidence bound to exact bytes. Do not make them routine Markdown-edit gates.
+
+Never push, publish, or cloud-sync.
+
+## 12. Result States
 
 Return exactly one execution result:
 
-- `ACTION_COMPLETED_NOW`: approved updates were made and validated.
-- `ALREADY_IN_DESIRED_STATE`: existing knowledge already covers every eligible candidate; do not modify files or create an empty commit.
-- `BLOCKED`: a required input or safe gate is missing; state only the minimum unblock requirement.
+- `ACTION_COMPLETED_NOW`: approved changes were made and validated.
+- `ALREADY_IN_DESIRED_STATE`: all eligible knowledge was already covered or the supplied candidates require no PKB write; no files changed and no empty commit was created.
+- `BLOCKED`: a global gate or exact required decision is missing.
 
-Keep candidate identification, file modification, validation, and Git commit status distinct.
+Keep candidate identification, file edits, validation, and commit state separate.
 
-## Validation Scenarios
+## 13. Minimum Contract Checks
 
-Use these static cases to verify behavior:
+When this Skill or its Bridge Prompt changes, verify at least:
 
-1. `PROJECT_CLOSEOUT_PACKAGE` + `ALL` + `AUDIT_THEN_CONFIRM`: read and deduplicate the supplied closeout package; phase one makes no changes.
-2. `REPOSITORY_ONLY` + `PITFALLS` + `AUDIT_ONLY`: inspect current Pitfall structure and duplication only; make no changes.
-3. `PROJECT_CLOSEOUT_PACKAGE` without `SOURCE_PACKAGE`: return `BLOCKED` and request only the missing package.
-4. A new Codex task that lacks the previous project thread: do not infer access; require the project closeout package.
-5. A package containing only project versions, commits, hashes, and one-off state: classify as `PROJECT_ONLY`; do not update or commit the PKB.
-6. Unconfirmed inferred health, political, religious, or other sensitive attributes: exclude them or return `BLOCKED`; never write them.
-7. Fully covered candidate knowledge: return `ALREADY_IN_DESIRED_STATE`; do not modify or create an empty commit.
-8. A proposed deletion or large rewrite without explicit approval: return `BLOCKED` and request only the deletion decision.
-9. A source project with a dirty worktree: return `BLOCKED`; do not absorb knowledge.
+1. a non-project Chat window with no durable candidate returns `NO_PKB_ACTION_REQUIRED` at the Bridge stage;
+2. a non-project Chat window with a durable user-confirmed preference produces a valid `CHAT_WINDOW_REVIEW` package;
+3. `CHAT_WINDOW_REVIEW` does not require Project Closeout, `PKB_SYNC_REQUIRED`, project branch, commit, or clean-worktree evidence;
+4. a project Chat window may use `CHAT_WINDOW_REVIEW` before or without Project Closeout;
+5. `PROJECT_CLOSEOUT_PACKAGE` remains supported as an optional convenience path;
+6. fully covered candidates create no edit or commit;
+7. mixed valid and invalid candidates are handled independently;
+8. Secret values, general-information-only content, temporary state, and project-only details are excluded;
+9. unknown PKB worktree changes block writes;
+10. incorrect parameter names or unsupported schema versions block clearly.
