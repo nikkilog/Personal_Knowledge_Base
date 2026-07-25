@@ -1,6 +1,6 @@
 # Knowledge Routing
 
-Assign each detailed item to exactly one owner.
+Route each detailed candidate to exactly one authoritative owner before drafting.
 
 ## Knowledge Types
 
@@ -9,6 +9,7 @@ Assign each detailed item to exactly one owner.
 - `PKB_OPERATING_RULE`
 - `PROJECT_ONLY`
 - `WORKSPACE_RULE`
+- `GENERAL_INFORMATION_ONLY`
 - `NO_ACTION`
 
 ## Recommended Actions
@@ -21,45 +22,65 @@ Use exactly one:
 - `ALREADY_COVERED`
 - `KEEP_IN_PROJECT_ONLY`
 - `UPDATE_WORKSPACE_CONTROL_SEPARATELY`
+- `GENERAL_INFORMATION_NO_PKB_WRITE`
 - `NO_ACTION`
 
-Prefer, in order:
+Prefer merge, then update, then create. If fully covered, use `ALREADY_COVERED` and make no edit.
 
-1. `MERGE_INTO_EXISTING_ENTRY`
-2. `UPDATE_EXISTING`
-3. `CREATE_NEW_ENTRY`
-4. `ALREADY_COVERED`
-5. `NO_ACTION`
+## Owner Files
 
-## `PERSONAL_CONTEXT.md`
+### `PERSONAL_CONTEXT.md`
 
-Store durable working, communication, output, acceptance, Codex-collaboration, project-management, and cross-project work preferences.
+Store durable personal background, working preferences, communication preferences, output and acceptance habits, and cross-project collaboration preferences.
 
-Examples of eligible durable collaboration preferences include:
+Do not store temporary project state, branch, commit, run ID, resource ID, project version, or project next step.
 
-- using Codex to maintain project logic, rules, steps, current progress, next actions, current valid artifacts, pitfalls, and local Git closeout;
-- requiring a unique Current code/document entry point so a new person or AI does not guess the latest version;
-- listing candidate deletions for explicit user confirmation, optionally supported by screenshots or a concrete file list;
-- preferring source-project closeout before PKB absorption.
+### `PITFALL_LOG.md`
 
-## `PITFALL_LOG.md`
+Store incidents that actually occurred and have reusable observable symptoms, sufficiently established causes, correct handling, verification, and prevention value.
 
-Store verified incidents with the problem, observable symptom, root cause, wrong handling, correct handling, verification, prevention, and applicability.
+A personal preference is not automatically a Pitfall. A technical rule is not a Pitfall unless the failure actually occurred.
 
-## `AGENTS.md`
+### `AGENTS.md`
 
-Store only PKB-local rules for privacy, deduplication, file responsibilities, Git, archive handling, local-only operation, and safe closeout execution.
+Store only mandatory PKB-local operating, privacy, file-responsibility, deduplication, archive, validation, and Git rules.
 
-## `PROJECT.md`
+Modify it only when those rules change. Do not store ordinary preferences.
 
-Store only the PKB's purpose, Current files, status, focus, maintenance workflow, and local boundary.
+### `PROJECT.md`
 
-## `PROJECT_ONLY`
+Store only the PKB repository's own purpose, Current files, status, maintenance entry point, and current maintenance focus.
 
-Keep project versions, commits, run IDs, resource IDs, Current state, project next steps, schemas, controllers, project-specific code identity, and project-specific pitfalls in their source project. Do not absorb them into PKB.
+### `PROJECT_ONLY`
 
-## `WORKSPACE_RULE`
+Keep project versions, branches, commits, hashes, run IDs, resource IDs, Current state, project next steps, schemas, controllers, business choices, and readable source-project facts in the source project.
 
-Classify cross-project engineering governance, including global Git, Skill, repository-isolation, and lifecycle rules, as workspace follow-up. Do not write it to Workspace_Control from this Skill.
+### `WORKSPACE_RULE`
 
-When an item touches several categories, choose the single detailed owner and use only a short cross-reference elsewhere if strictly necessary.
+Use for governance that applies across repositories or changes global Git, Skill, repository-isolation, or workspace lifecycle rules. Report it as follow-up; do not update Workspace_Control from this Skill.
+
+### `GENERAL_INFORMATION_ONLY`
+
+Use for ordinary general knowledge that has no durable user-specific, operational, or verified Pitfall value. Use `GENERAL_INFORMATION_NO_PKB_WRITE`; do not store it in PKB.
+
+## Conflict and Authorization Boundary
+
+Interpret repository rules in this order:
+
+1. current explicit user instruction;
+2. PKB `AGENTS.md`;
+3. active Skill contract;
+4. `PROJECT.md`;
+5. `PERSONAL_CONTEXT.md`;
+6. `PITFALL_LOG.md`.
+
+A durable preference is a default choice, not authorization for deletion, destructive overwrite, cross-repository modification, stage, commit, push, publication, cloud synchronization, or writing unconfirmed personal information.
+
+## Cross-file Movement
+
+When detailed knowledge moves to a better owner:
+
+- classify the change as `MOVED_TO_CORRECT_DOCUMENT`;
+- identify the old owner and surviving owner;
+- preserve a short cross-reference only when useful;
+- remove duplicate detailed text only after semantic preservation is confirmed.

@@ -2,68 +2,50 @@
 
 ## Phase-one Audit
 
-Report at least:
+Keep the default audit concise. Report:
 
-### Repository Context
+### Repository Gate
 
 - repository;
 - branch;
 - HEAD;
 - Git status;
-- whether it is safe to continue.
-
-### Sources Read
-
-List the actual PKB files and source package/thread/file evidence read.
+- safe to continue: `YES` or `NO`.
 
 ### Existing Coverage
 
-State what the current PKB already covers and where.
+State the relevant existing owner and whether the candidate is already covered.
 
-### Candidate Tables
+### Candidate Decisions
 
-- Personal Context Candidates
-- Pitfall Candidates
-- PKB Operating Rule Candidates
-- Workspace Rule Candidates
+For each material candidate include only:
 
-For each candidate include:
-
-- candidate knowledge;
-- source evidence;
-- expected durability;
-- applicability;
-- current owner or coverage;
-- project-specific details to remove;
-- knowledge type;
-- recommended action.
-
-### Knowledge Absorption Plan
-
-Include:
-
-- knowledge type;
 - candidate;
-- existing owner;
-- target file;
+- fact level;
+- knowledge type;
+- existing owner or coverage;
 - recommended action;
-- write/merge method;
-- project-specific information removed;
-- whether an update is needed.
+- project-specific details to strip;
+- unresolved decision, if any.
 
-### Files Proposed
+### Bounded Execution Package
 
-List only files that may actually change.
+Provide one recommended set of exact files and entries that may change after confirmation.
 
 ### No-action Items
 
-Explicitly identify knowledge that is already covered, project-only, unverified, temporary, sensitive, or without durable value.
+Identify items that are already covered, project-only, unverified, temporary, sensitive, or without durable value.
 
-### Recommended Execution Package
+Phase one must not modify, delete, stage, or commit.
 
-Provide one unique recommended package. Phase one must not modify, delete, stage, or commit.
+Expand into detailed evidence tables only when a deletion, major compression, cross-file move, disputed classification, or other high-risk change requires it.
 
-Do not present an identified candidate as a file modification or a modification as a committed change.
+## Bridge and Source-mode Boundary
+
+- A Chat-window Bridge with no eligible durable candidate returns `NO_PKB_ACTION_REQUIRED` and creates no Source Package.
+- `ALREADY_IN_DESIRED_STATE` is a Skill execution result used after a valid source reaches repository routing and deduplication; it is not a replacement for the Bridge result.
+- `CHAT_WINDOW_REVIEW` is the default independent source mode and must not inherit Project, Project Closeout, `PKB_SYNC_REQUIRED`, branch, commit, or clean-worktree gates.
+- `PROJECT_CLOSEOUT_PACKAGE` is an optional compatibility entry whose closeout gates apply only in that source mode.
 
 ## Final Report
 
@@ -71,6 +53,7 @@ Report every field, using `NONE`, `NO`, or `N/A` where appropriate:
 
 ```text
 PERSONAL_KNOWLEDGE_REVIEWED:
+PACKAGE_SCHEMA_VERSION:
 SOURCE_MODE:
 SOURCE_SCOPE:
 KNOWLEDGE_FOCUS:
@@ -83,6 +66,7 @@ PKB_PROJECT_UPDATED:
 ARCHIVE_UPDATED:
 KNOWLEDGE_ADDED:
 KNOWLEDGE_MERGED:
+KNOWLEDGE_MOVED:
 ALREADY_COVERED:
 PROJECT_ONLY_ITEMS:
 WORKSPACE_RULE_FOLLOW_UP_REQUIRED:
@@ -100,4 +84,6 @@ OTHER_REPOS_MODIFIED:
 NEXT_ACTION:
 ```
 
-Use `ACTION_COMPLETED_NOW`, `ALREADY_IN_DESIRED_STATE`, or `BLOCKED` for `EXECUTION_RESULT`. Never conflate audit findings, edits, validation, and commit state.
+Use `ACTION_COMPLETED_NOW`, `ALREADY_IN_DESIRED_STATE`, or `BLOCKED` for `EXECUTION_RESULT`.
+
+Never conflate candidate identification, file edits, validation, and commit state.
