@@ -109,9 +109,10 @@
 
 ### Controller、Runtime 与认证
 
-- Cell 1 作为统一 Controller，集中放日期范围、项目、开关、阈值和输入输出位置等人工配置。
 - 面向多个同类项目建设工具时，默认目标是让项目通过项目代码、路由、表格配置、Secret 名称、字段字典和 Job 参数即插即拔接入；历史特例或临时路由不能反向定义框架的正式职责，也不应因切换项目而复制或重写核心业务代码。
-- Colab 通常保持为薄入口：Cell 1 集中参数、开关和 Secret 名称，Cell 2 完成认证、代码刷新和模块加载，Cell 3 执行任务并展示结果；核心业务逻辑优先由可复用的 Python 包承载。共享 Python 没有当前项目专用 Notebook 入口，不等于能力缺失，也不需要为形式完整维护近似副本。
+- 新建或重构的 Colab 默认采用 4 Cell 薄入口：Cell 0 是默认关闭的可选 Notebook Registry；Cell 1 是统一 Controller，集中业务参数、运行开关、Secret 名称、阈值和输入输出位置；Cell 2 完成认证、依赖、代码刷新和模块加载；Cell 3 执行任务、持续反馈进度并输出最终结果。核心业务逻辑优先由可复用的 Python 包承载；共享 Python 没有当前项目专用 Notebook 入口，不等于能力缺失，也不需要为形式完整维护近似副本。
+- Notebook Registry 是辅助功能，默认关闭且不得默认阻断业务任务。启用后应按 `job_name + sheet_label + Tab name` 的逻辑唯一键定位记录：零条或多条匹配时明确 warning，不自动追加或任意修改；只有一条匹配时才定向更新。默认非 strict 模式继续主任务，只有操作者显式启用 strict 才允许登记异常中止运行。
+- Registry 只按需同步容易变化的 Notebook URL 和名称；用途、排序、说明、审核状态、逻辑键和主要操作字段等低频治理信息由表中人工维护。主要操作字段只登记会改变 Job 行为且操作者需要知道允许值的控制字段，例如 `action`、`op`、`mode`、`review_status` 或 `write_mode`，不罗列普通输入列。
 - 同一本 Notebook 应支持 Colab 与 Local Runtime，业务逻辑保持单一，通过 Secret Loader、Runtime Adapter 和环境配置处理差异。
 - “正式免弹窗版”指使用已确认的 Runtime Adapter、Secret Loader 和项目专用 Secret 映射，使 Colab 与 Local Runtime 都能采用预配置的非交互认证；它不等同于简单改用 Service Account。
 - 如果确实必须交互授权，应紧接 Cell 1 发生，不应运行到中途才弹窗。
@@ -173,6 +174,7 @@
 - 仓库内的正式 Current 使用稳定、无版本号的操作型名称和固定位置，日常修改原位更新。
 - 普通历史由 Git History 保存；只有重大修改、非 Git 资产或具有独立追溯价值的旧资产才进入 Archive。
 - 聊天窗口交付修改后的完整文件时使用新的明确文件名，避免浏览器缓存、旧附件或同名下载混淆；用户确认后再放回仓库的稳定 Current 名称。
+- 修改或交付仓库代码时，以真实仓库树、目录和模块名为权威，不得擅自重命名、迁移或改写 import 身份。下载交付件可以使用版本化名称避免缓存，但其内容必须能够按获批方式覆盖仓库中既有的正式文件，下载名不能反向改变 Current 的正式路径或模块名。
 - Runtime 执行副本只服务本地执行或调度，不反向定义源码 Current；源码或 runner 更新后按规则刷新 Runtime copy。
 - 远程下载、动态 import 或容易受缓存影响的 Python 模块是稳定 Current 命名规则的例外：交付时使用新版本化文件名，并在运行入口打印实际文件路径和版本。详细经验见 `PITFALL_LOG.md` 的 P054。
 - 本地 Runtime 目录使用稳定层级结构，避免散落为临时平行目录；PKB 只记录组织原则，不保存项目绝对路径。
