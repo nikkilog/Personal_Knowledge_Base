@@ -2,7 +2,7 @@
 
 > Scope: This file applies only to the `Personal_Knowledge_Base` repository.
 >
-> Purpose: Define mandatory operating, privacy, ownership, editing, validation, and local Git rules. Personal preferences belong in `PERSONAL_CONTEXT.md`; reusable incidents belong in `PITFALL_LOG.md`.
+> Purpose: Define mandatory operating, privacy, ownership, editing, validation, local Git, and GitHub read-only mirror rules. Personal preferences belong in `PERSONAL_CONTEXT.md`; reusable incidents belong in `PITFALL_LOG.md`.
 
 ## 1. Rule Priority and Authorization
 
@@ -20,12 +20,14 @@ When PKB files conflict, use this order for repository interpretation:
 5. `PERSONAL_CONTEXT.md` durable preferences;
 6. `PITFALL_LOG.md` experience-based guidance.
 
-## 2. Storage and Version Control
+## 2. Storage, Authority, and GitHub Mirror
 
-- The repository is stored only on the local machine.
-- Local files are the only editing source.
-- Local Git is the only routine version-history mechanism.
-- Do not upload, push, publish, synchronize, or back up the repository to Google Drive, iCloud, GitHub, OneDrive, Dropbox, shared storage, or another cloud service.
+- The local `Personal_Knowledge_Base` repository and its local files are the sole editing source and authoritative Current.
+- Local Git is the routine version-history mechanism.
+- The GitHub repository `nikkilog/Personal_Knowledge_Base` may be maintained as a read-only online mirror so online ChatGPT sessions can retrieve task-relevant PKB knowledge.
+- All PKB edits, deduplication, validation, and commits must be completed locally. Do not edit PKB directly through GitHub, an online AI session, or another cloud copy.
+- Mirror synchronization must start from a validated local commit and requires explicit user authorization. The GitHub mirror must not develop an independent Current or unreviewed history.
+- Do not synchronize or back up the repository to Google Drive, iCloud, OneDrive, Dropbox, shared storage, or another cloud service unless this rule is explicitly changed.
 - Do not copy PKB files into CAH or another project repository.
 - Encrypted offline backup is allowed.
 
@@ -41,6 +43,8 @@ When PKB files conflict, use this order for repository interpretation:
 
 - Ordinary code tasks must not read `PERSONAL_CONTEXT.md` by default.
 - Read `PERSONAL_CONTEXT.md` only when the user explicitly requests it, the task directly depends on durable personal context, or an approved PKB knowledge-absorption workflow requires it.
+- When the user asks an online ChatGPT session to consult PKB, search the GitHub mirror using task-relevant terms and read only the matched files and necessary sections or paragraphs. Expand the search only when the first retrieval is insufficient; do not read all four Current Markdown files merely for formality.
+- PKB provides durable preferences, governance rules, and reusable Pitfalls; it is not evidence of an external project's current implementation. For work on an existing project, the source project's Current files, actual code, and user-supplied reference assets are authoritative for current contracts. If those sources are unavailable or do not establish a material detail, request evidence instead of inventing it.
 - For an audit based on files supplied by the user, use the supplied Current copies as the source of truth. Do not silently substitute older Library copies or neighboring files.
 
 ## 5. Authoritative File Responsibilities
@@ -113,4 +117,5 @@ Full hashes, byte-level manifests, or exact-runtime evidence are required only w
 
 - Commit only when the user has authorized execution and the selected workflow permits a commit.
 - PKB commits must be independent from source-project commits.
-- Never push, publish, or cloud-sync after commit.
+- Upload or push a validated local commit to the GitHub read-only mirror only when the user has explicitly authorized that synchronization.
+- Never publish or cloud-sync PKB through another destination unless the governing rule is explicitly changed.
