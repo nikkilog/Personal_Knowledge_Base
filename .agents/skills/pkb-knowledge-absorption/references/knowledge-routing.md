@@ -1,6 +1,21 @@
 # Knowledge Routing
 
-Route each detailed candidate to exactly one authoritative owner before drafting.
+Route each detailed candidate to exactly one authoritative owner before drafting. Keep knowledge ownership separate from implementation evidence.
+
+
+## Source Authority Layers
+
+Use three distinct layers:
+
+1. `PKB_CURRENT`: durable preferences, PKB governance, collaboration methods, and verified reusable Pitfalls. The local repository is authoritative; the GitHub copy is a retrieval-only mirror.
+2. `PROJECT_CURRENT`: current code, formal project documentation, configuration contracts, Secret names, module paths, schemas, Runtime adapters, and validated reference implementations.
+3. `CURRENT_SOURCE`: the current Chat, Source Package, user-supplied file, or current Codex evidence and authorization.
+
+PKB does not prove a project's current implementation. A durable rule that says where or how to verify project facts may belong in `PERSONAL_CONTEXT.md` or `AGENTS.md`; the concrete project fact itself remains `PROJECT_ONLY`.
+
+When the current implementation matters, record the project Current or user-supplied reference that established it. If that evidence is absent, use `NEEDS_CONFIRMATION`, `KEEP_IN_PROJECT_ONLY`, or `NO_ACTION`; never invent a plausible contract from general experience.
+
+The GitHub mirror is not an owner file and must never receive direct edits from this Skill.
 
 ## Knowledge Types
 
@@ -43,13 +58,13 @@ A personal preference is not automatically a Pitfall. A technical rule is not a 
 
 ### `AGENTS.md`
 
-Store only mandatory PKB-local operating, privacy, file-responsibility, deduplication, archive, validation, and Git rules.
+Store only mandatory PKB-local operating, privacy, file-responsibility, deduplication, archive, validation, local-Git authority, and GitHub read-only mirror rules.
 
 Modify it only when those rules change. Do not store ordinary preferences.
 
 ### `PROJECT.md`
 
-Store only the PKB repository's own purpose, Current files, status, maintenance entry point, and current maintenance focus.
+Store only the PKB repository's own purpose, Current files, status, maintenance entry point, local-authority and mirror boundary, and current maintenance focus.
 
 ### `PROJECT_ONLY`
 
@@ -74,7 +89,7 @@ Interpret repository rules in this order:
 5. `PERSONAL_CONTEXT.md`;
 6. `PITFALL_LOG.md`.
 
-A durable preference is a default choice, not authorization for deletion, destructive overwrite, cross-repository modification, stage, commit, push, publication, cloud synchronization, or writing unconfirmed personal information.
+A durable preference is a default choice, not authorization for deletion, destructive overwrite, cross-repository modification, stage, commit, GitHub mirror synchronization, publication, other cloud synchronization, or writing unconfirmed personal information.
 
 ## Cross-file Movement
 

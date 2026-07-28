@@ -12,6 +12,19 @@ Keep the default audit concise. Report:
 - Git status;
 - safe to continue: `YES` or `NO`.
 
+
+### Authority and Evidence Summary
+
+Report only the sources material to the decisions:
+
+- PKB files or entries consulted;
+- external-project Current files or user-supplied reference assets consulted;
+- current Chat, Source Package, or Codex evidence used;
+- implementation facts established by those sources;
+- unresolved evidence gaps that must not be guessed.
+
+The GitHub mirror may be reported as the online retrieval source, but the local PKB remains the editing and Current authority.
+
 ### Existing Coverage
 
 State the relevant existing owner and whether the candidate is already covered.
@@ -30,7 +43,7 @@ For each material candidate include only:
 
 ### Bounded Execution Package
 
-Provide one recommended set of exact files and entries that may change after confirmation.
+Provide one recommended set of exact local files and entries that may change after confirmation. State `MIRROR_SYNC_MODE` separately; mirror synchronization is never implied by file-edit approval.
 
 ### No-action Items
 
@@ -78,6 +91,10 @@ GIT_DIFF_CHECK:
 COMMIT_HASH:
 CURRENT_BRANCH:
 WORKTREE_CLEAN:
+MIRROR_SYNC_MODE:
+MIRROR_REMOTE:
+MIRROR_SYNC_STATUS:
+MIRROR_COMMIT:
 PUSH_PERFORMED:
 CLOUD_SYNC_PERFORMED:
 OTHER_REPOS_MODIFIED:
@@ -87,3 +104,13 @@ NEXT_ACTION:
 Use `ACTION_COMPLETED_NOW`, `ALREADY_IN_DESIRED_STATE`, or `BLOCKED` for `EXECUTION_RESULT`.
 
 Never conflate candidate identification, file edits, validation, and commit state.
+
+
+## Mirror Reporting Rules
+
+- `MIRROR_SYNC_MODE` is `NO_SYNC` or `SYNC_AFTER_VALIDATED_COMMIT`.
+- `MIRROR_SYNC_STATUS` is `NOT_REQUESTED`, `COMPLETED`, `FAILED`, or `BLOCKED`.
+- `MIRROR_COMMIT` is the validated local commit confirmed on the remote, or `NONE`.
+- `PUSH_PERFORMED` is `YES` only when the authorized GitHub mirror push actually completed.
+- `CLOUD_SYNC_PERFORMED` is `GITHUB_READ_ONLY_MIRROR_ONLY` for that authorized push; otherwise `NO`. Any other cloud synchronization is out of scope and prohibited.
+- If local absorption and commit succeed but optional mirror synchronization fails, report the local work accurately as completed, set mirror status to `FAILED` or `BLOCKED`, and give the exact remaining mirror action. Do not claim that the mirror is current.

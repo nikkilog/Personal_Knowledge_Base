@@ -38,7 +38,8 @@ The package should contain:
 - possible existing coverage;
 - topic-specific or project-specific details to strip;
 - content explicitly excluded from PKB;
-- fact levels and uncertainties.
+- fact levels and uncertainties;
+- when a candidate depends on an external project's implementation, the project Current or user-supplied reference asset that established the implementation fact, plus any unresolved evidence gap.
 
 This mode must not require:
 
@@ -74,9 +75,10 @@ The package should contain, where applicable:
 - possible existing coverage;
 - project-specific details that must be stripped;
 - items that must remain in the source project;
-- fact levels and uncertainties.
+- fact levels and uncertainties;
+- when a candidate depends on implementation facts, the source-project Current or validated reference that established them, plus any unresolved evidence gap.
 
-Project Closeout is a convenience source, not the universal PKB entry point.
+Project Closeout is a convenience source, not the universal PKB entry point. PKB principles must not be used as substitute evidence for current project contracts.
 
 ## `USER_PROVIDED_SOURCE_PACKAGE`
 
@@ -95,6 +97,17 @@ Use only the explicitly supplied local file. Do not browse neighboring project f
 ## `REPOSITORY_ONLY`
 
 Use only to audit current PKB structure, ownership, duplication, or existing coverage. It does not authorize inventing source evidence.
+
+
+## Source Authority
+
+For every implementation-dependent candidate, distinguish:
+
+- `PKB_CURRENT`: durable preferences, governance, and verified Pitfalls consulted;
+- `PROJECT_CURRENT`: current project files, code, formal documents, or user-supplied validated references that establish implementation facts;
+- `CURRENT_SOURCE`: the current Chat, package, file, or Codex evidence and authorization.
+
+A package may summarize project evidence, but it must identify the underlying source. When the underlying project Current or reference evidence is unavailable, preserve the gap as `NEEDS_CONFIRMATION` or keep the item project-only. Do not infer Secret names, authentication paths, module identities, schemas, field keys, Runtime structures, or other current contracts from PKB guidance alone.
 
 ## Fact Levels
 

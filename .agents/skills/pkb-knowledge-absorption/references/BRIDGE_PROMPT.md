@@ -52,9 +52,17 @@ AUDIT_THEN_CONFIRM
 
 COMMIT_MODE:
 COMMIT_AFTER_VALIDATION
+
+MIRROR_SYNC_MODE:
+NO_SYNC
+
+MIRROR_REMOTE:
+origin
 ```
 
-`SOURCE_PACKAGE` 只传递本窗口的动态事实，不重复 Skill 中已经定义的稳定治理规则。
+默认使用 `MIRROR_SYNC_MODE: NO_SYNC`。只有用户在本窗口明确要求本地验证并提交后同步 GitHub 只读镜像时，最终调用包才改为 `SYNC_AFTER_VALIDATED_COMMIT`；不得让用户手工补参数。
+
+`SOURCE_PACKAGE` 只传递本窗口的动态事实，不重复 Skill 中已经定义的稳定治理规则。PKB 规则、外部项目 Current 和当前聊天必须作为不同事实层处理；PKB 不得替代当前项目实现证据。
 
 ## 自动审查范围
 
@@ -93,6 +101,17 @@ Source Package 只是信息传递载体，不是独立证据。不得因为整�
 - 有明确实际执行依据的 `OBSERVED_WORKFLOW`
 
 `INFERENCE` 和 `NEEDS_CONFIRMATION` 只能交给 Codex 标记，不得要求直接写入 PKB。
+
+
+## 事实来源层级
+
+生成 Source Package 时必须区分：
+
+1. **PKB**：长期偏好、治理规则、协作方式和已确认 Pitfall；
+2. **外部项目 Current**：当前代码、正式项目文档、Secret 名称、模块路径、Schema、Runtime Adapter 和已运行参考实现；
+3. **当前聊天**：本轮目标、参数、Working Assumption、用户补充资料和本次授权。
+
+涉及现有项目实现的候选，必须说明当前窗口中实际出现了哪一份项目 Current、代码、日志或用户提供的参考文件。没有实现证据时，写入 `NEEDS_CONFIRMATION` 或明确保持项目专属；不得根据 PKB 的通用原则补造具体契约。
 
 ## 排除范围
 
@@ -141,6 +160,12 @@ AUDIT_THEN_CONFIRM
 COMMIT_MODE:
 COMMIT_AFTER_VALIDATION
 
+MIRROR_SYNC_MODE:
+<根据本窗口明确授权自动填写 SYNC_AFTER_VALIDATED_COMMIT 或 NO_SYNC>
+
+MIRROR_REMOTE:
+origin
+
 SOURCE_PACKAGE:
 
 PKB_ABSORPTION_RECOMMENDED:
@@ -151,6 +176,15 @@ YES
 
 可选的项目或收口背景：
 <存在时自动填写；不存在时写 NONE>
+
+本窗口实际使用的事实来源层级：
+<分别列出 PKB、外部项目 Current、当前聊天；未使用的层级写 NONE>
+
+外部项目 Current 或参考实现证据：
+<逐项列出当前窗口实际提供或观察到的文件、代码、日志或正式文档；没有时写 NONE>
+
+尚未取得的实现证据：
+<存在证据缺口时逐项填写；没有时写 NONE>
 
 Personal Context 候选：
 <自动填写；没有时写 NONE>
@@ -175,8 +209,8 @@ PKB 操作规则候选：
 
 要求 Codex：
 
-- 先读取 PKB 的 AGENTS.md、PROJECT.md、PERSONAL_CONTEXT.md 和 PITFALL_LOG.md；
-- 第一阶段只读审计，逐候选完成 owner routing、查重和唯一 bounded execution package；
+- 因本任务属于 PKB 维护，先读取本地 PKB 的 AGENTS.md、PROJECT.md、PERSONAL_CONTEXT.md 和 PITFALL_LOG.md；不得把这一全量读取规则扩展成普通外部项目任务的默认行为；
+- 第一阶段只读审计，逐候选完成 owner routing、查重、事实来源分层和唯一 bounded execution package；
 - 优先 MERGE_INTO_EXISTING_ENTRY，其次 UPDATE_EXISTING，最后才 CREATE_NEW_ENTRY；
 - 已完整覆盖的内容标记 ALREADY_COVERED，不修改文件、不创建空提交；
 - 单个候选证据不足时只处理该候选，不阻塞其他有效候选；
@@ -184,8 +218,11 @@ PKB 操作规则候选：
 - 确认后只修改获批文件和条目；
 - 验证后才允许独立提交；
 - 不要求存在 Project Closeout 或 PKB_SYNC_REQUIRED；
+- PKB 只提供长期规则，不作为外部项目 Current 的替代证据；涉及具体实现时必须指出项目 Current 或参考资产，缺少证据时停止补猜；
 - 不修改来源项目、Workspace_Control 或其他仓库；
-- 不 push、不发布、不进行云同步。
+- 所有 PKB 编辑和 commit 只在本地权威仓库完成；不得通过 GitHub 直接编辑；
+- `MIRROR_SYNC_MODE=NO_SYNC` 时不 push；只有本窗口明确授权且本地验证、commit、clean worktree、remote 校验全部通过时，才允许普通非强制 push 到 GitHub 只读镜像；
+- 不发布，也不向 GitHub 镜像以外的云端或共享存储同步。
 ```
 
-最终不得保留任何 `<...>` 占位符；必须用本窗口真实内容填写。没有内容的候选区写 `NONE`。
+最终不得保留任何 `<...>` 占位符；必须用本窗口真实内容填写。没有内容的候选区写 `NONE`。`MIRROR_SYNC_MODE` 必须根据用户在本窗口是否明确授权自动填写，不得让用户事后补参数。

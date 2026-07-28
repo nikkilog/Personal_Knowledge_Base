@@ -13,6 +13,17 @@ Add or materially update a Pitfall only when:
 
 If evidence remains incomplete, keep it project-only, mark the candidate `NEEDS_CONFIRMATION` or `NO_ACTION`, or merge only the verified portion into an existing entry.
 
+
+## Implementation-contract Incidents
+
+When a Pitfall concerns an invented, stale, or mismatched project contract:
+
+- establish the actual project Current or user-supplied validated reference that should have been followed;
+- identify the observable mismatch, not merely that the output “felt wrong”;
+- distinguish the durable cause from project-specific names and paths;
+- preserve the reusable prevention rule: consult PKB for durable guidance, consult project Current for implementation facts, and stop rather than guess when evidence is missing;
+- do not admit the Pitfall solely because PKB contained a general preference and the generated implementation later failed.
+
 ## Required Content
 
 A current Pitfall must preserve:

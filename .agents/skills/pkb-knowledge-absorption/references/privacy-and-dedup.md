@@ -2,7 +2,7 @@
 
 ## Privacy Gate
 
-- Keep PKB strictly local. Do not push, publish, cloud-sync, or place it in shared storage.
+- Keep the local PKB repository and local Git as the sole editing and Current authority. A validated local commit may be pushed to the authorized GitHub read-only mirror only with explicit user authorization and the mirror gates defined by `AGENTS.md`. Do not edit PKB through GitHub, force-push, publish, synchronize to another cloud destination, or place PKB in shared storage.
 - Never store Secret values, tokens, passwords, private keys, OAuth credentials, Service Account JSON, authentication JSON, or recovery codes.
 - Necessary Secret names or non-sensitive configuration keys may be kept only when required to explain a durable rule; never store values.
 - Never store AI-inferred sensitive personal attributes without explicit user confirmation.
@@ -10,6 +10,15 @@
 - Preserve only the minimum context required to understand and apply the durable rule.
 
 Exclude unsafe material rather than weakening these rules.
+
+
+## Source Authority and Evidence Gaps
+
+- PKB stores durable rules and preferences; it does not establish an external project's current implementation.
+- Current Secret names, authentication adapters, module paths, schemas, field keys, Runtime structures, and validated implementations must come from the source project's Current or an explicitly supplied reference asset.
+- Current Chat or Source Package content supplies the present candidate, parameters, and authorization, but confident summary wording does not replace implementation evidence.
+- When an implementation-dependent candidate lacks project Current evidence, mark the gap and do not invent the missing contract.
+- The GitHub mirror is a retrieval copy, not a separate evidence owner or editing source.
 
 ## Deduplication
 
