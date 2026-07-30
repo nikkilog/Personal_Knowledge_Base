@@ -5,7 +5,7 @@
 > 不记录：临时项目状态、版本、分支、commit、run_id、资源 ID、一次性报错或具体下一步。这些内容应留在对应项目仓库。
 >
 > 状态：Current
-> 最后更新：2026-07-29
+> 最后更新：2026-07-30
 
 ## 1. 我是谁
 
@@ -159,7 +159,9 @@
 - `rows_pending`
 - `rows_planned`
 - `rows_written`
+- `rows_no_change`
 - `rows_skipped`
+- `rows_failed`
 - `warning_count`
 - `error_count`
 - `business_objects_planned`
@@ -168,7 +170,7 @@
 - `api_operations_failed`
 - 输出视图列表
 
-输入行、通过校验的行、计划业务对象、计划 API 操作、成功或失败的 API 操作和实际写入行必须按真实语义区分；多个输入行可能合并为一个操作，不能把输入行数直接当成写入次数。只有存在独立“识别”阶段时才额外使用 `rows_recognized`，不把它强制为所有 Notebook 的通用字段。
+输入行、通过校验的行、计划业务对象、计划 API 操作、成功或失败的 API 操作和实际写入行必须按真实语义区分；多个输入行可能合并为一个操作，不能把输入行数直接当成写入次数。`NO_CHANGE`、`ALREADY_CORRECT` 等目标状态原本已满足的幂等无操作结果应计入 `rows_no_change`，不得混入 `rows_skipped`；`rows_skipped` 只表示因范围、规则、门禁或其他原因未进入计划或执行的对象，`rows_failed` 表示处理失败。摘要应让操作者直接区分已实际改变、原本正确无需改变、被跳过和失败。只有存在独立“识别”阶段时才额外使用 `rows_recognized`，不把它强制为所有 Notebook 的通用字段。
 
 ### 交付范围
 
