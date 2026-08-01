@@ -336,6 +336,15 @@
 - **正确处理**：API batch size 独立控制每次远程调用的对象数。已经完整预检、明确获批、可分批且对象互相独立，并具备失败隔离和写后验证时，一次启动自动完成全部 READY 对象；总对象上限应是可选、显式且由操作者主动设置的门禁，可使用 `0 = unlimited` 或等价清楚合同。安全依靠 Dry Run、明确确认、完整预检、分批进度、失败隔离、合理重试、写后回读和最终证据，不能用强迫人工拆批替代这些机制。
 - **验证与防复发**：构造超过旧固定上限但可安全自动分批的任务，确认一次运行生成正确的多个 API 批次并自动完成；正整数显式上限仍按合同阻断。摘要分别报告业务对象数和 API 操作数，且不要求操作者手动重复启动。
 
+### P083｜从旧版本移植能力时泄漏历史实现契约
+
+- **状态**：已确认
+- **问题与适用范围**：在 Current 上恢复或移植旧版本的性能、并发、重试或其他局部能力时，把旧实现当成整体修改底稿，使 Current 的 Schema、Source of Truth、operator-owned authoritative inputs 或已退役数据血缘契约回退。
+- **可观察表现**：已废弃的字段或旧 lineage 重新出现；实现虽声明某人工输入是权威来源，Normalize、Schema migration 或整行写回路径仍会改写它；性能改进通过语法或主流程验证，但数据契约已静默回退。
+- **根因与常见错误处理**：根因是 reference-version contract leakage：没有把旧版本限定为明确列举的 capability donor，导致复制局部能力时一并带回旧字段、来源优先级、Normalize 规则和写入范围。常见错误处理是只删除再次暴露的单个字段，或只做 syntax/runtime 和主流程验证，没有检查契约边界和实际写回副作用。
+- **正确处理**：Current 是唯一修改底稿；旧版本只能是事先明确列举的 capability donor，性能优化不得改变数据契约。开工前分别列出 `PRESERVE`、`IMPORT_ONLY` 和 `FORBIDDEN_LEGACY_CONTRACTS`；operator-owned authoritative inputs 默认 read-only，只有正式契约显式授权时才可执行 Schema migration 或 Normalize 写回。Flush 前如权威输入可能已变化，必须重新读取并校验关联条件，防止旧结果写到新输入旁。
+- **验证与防复发**：交付验证必须超越语法、Runtime 和主流程：检查 `FORBIDDEN_LEGACY_CONTRACTS` 中的旧字段和旧 lineage 未进入正式 Schema、读取、派生或写回路径；核对 Source of Truth 优先级和 protected write ranges；用动态 sentinel 测试在处理后、Flush 前改变权威输入，确认系统会重新校验、阻止或重新计算，不会把旧结果静默写回。
+
   ## 6. Notebook、文件和交付方式
 
 ### P037｜把单次远程大文件读取异常判定为正式数据损坏
@@ -490,10 +499,7 @@
   - Environment Config
 
   处理环境差异。
-- **验证与防复发**：同一个 Notebook：
-  - Colab 可运行；
-  - Local Kernel 可运行；
-  - 输出结果一致。
+- **验证与防复发**：Local 和 Colab 等多 Runtime 分别成功只能证明各自可运行，不能单独证明等价。等价验收必须同时核对可追溯的同一 source identity，例如 commit、revision、module version 或 exact source identity，以及业务结果、Schema、关键计数或 reconciliation。source identity 不一致时，即使当前输出相同也不得升级为 exact dual-runtime equivalence；Current 身份与证据成熟度的分层另见 P041。
 
 ### P035｜混淆 Local 依赖安装与 VSCode 环境注入生命周期
 
@@ -519,6 +525,7 @@
   - 依赖通常每个虚拟环境安装一次；
   - Local Notebook 缺依赖时快速失败并打印精确安装命令；
   - 共享包已在其他虚拟环境安装但当前 Notebook 报 `ModuleNotFoundError` 时，以当前 Kernel 的 `sys.executable` 为准，使用该解释器执行 `-m pip install -e <shared-package>`，不要用共享包自身环境的安装结果推断 Notebook 已可导入；
+  - 手工安装只修复当前 Runtime，不能证明项目的 dependency contract 完整；正式验收还必须核对实际 imports 与 requirements、pyproject 或其他权威 dependency manifest；
   - 需要本地环境变量时，通过本地启动器启动新的 VSCode 进程；
   - 排查时分别核对 Interpreter 路径、kernelspec resource directory、Notebook metadata 和进程环境，不用 UI 中的 Interpreter 选择替代 Kernel 验证；
   - 明确区分虚拟环境、Secret 键值配置和 Kernel 注册引用；Secret 使用项目专用映射文件，程序只读取唯一指定映射，不扫描或混用其他项目配置；
@@ -526,6 +533,7 @@
 - **验证与防复发**：- 当前 Kernel 的 Python 路径属于目标虚拟环境；
   - kernelspec、Notebook metadata 和当前 Kernel 的 Python executable 指向同一套预期环境；
   - 依赖预检和共享包 import 通过；安装或更新共享包后重启 Kernel，再从干净 Kernel 验证；
+  - 一个干净环境能从正式 dependency manifest 重建并通过实际 import 与最小运行验证；
   - 新 VSCode 进程能读取所需 Secret 名称；
   - Secret Loader 只读取当前项目指定映射，日志不包含 Secret 值；
   - Git 不包含虚拟环境目录、Secret 文件或凭据文件；
