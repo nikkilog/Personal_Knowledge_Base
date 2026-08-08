@@ -336,14 +336,14 @@
 - **正确处理**：API batch size 独立控制每次远程调用的对象数。已经完整预检、明确获批、可分批且对象互相独立，并具备失败隔离和写后验证时，一次启动自动完成全部 READY 对象；总对象上限应是可选、显式且由操作者主动设置的门禁，可使用 `0 = unlimited` 或等价清楚合同。安全依靠 Dry Run、明确确认、完整预检、分批进度、失败隔离、合理重试、写后回读和最终证据，不能用强迫人工拆批替代这些机制。
 - **验证与防复发**：构造超过旧固定上限但可安全自动分批的任务，确认一次运行生成正确的多个 API 批次并自动完成；正整数显式上限仍按合同阻断。摘要分别报告业务对象数和 API 操作数，且不要求操作者手动重复启动。
 
-### P083｜从旧版本移植能力时泄漏历史实现契约
+### P083｜复用 capability donor 时泄漏非目标实现契约
 
 - **状态**：已确认
-- **问题与适用范围**：在 Current 上恢复或移植旧版本的性能、并发、重试或其他局部能力时，把旧实现当成整体修改底稿，使 Current 的 Schema、Source of Truth、operator-owned authoritative inputs 或已退役数据血缘契约回退。
-- **可观察表现**：已废弃的字段或旧 lineage 重新出现；实现虽声明某人工输入是权威来源，Normalize、Schema migration 或整行写回路径仍会改写它；性能改进通过语法或主流程验证，但数据契约已静默回退。
-- **根因与常见错误处理**：根因是 reference-version contract leakage：没有把旧版本限定为明确列举的 capability donor，导致复制局部能力时一并带回旧字段、来源优先级、Normalize 规则和写入范围。常见错误处理是只删除再次暴露的单个字段，或只做 syntax/runtime 和主流程验证，没有检查契约边界和实际写回副作用。
-- **正确处理**：Current 是唯一修改底稿；旧版本只能是事先明确列举的 capability donor，性能优化不得改变数据契约。开工前分别列出 `PRESERVE`、`IMPORT_ONLY` 和 `FORBIDDEN_LEGACY_CONTRACTS`；operator-owned authoritative inputs 默认 read-only，只有正式契约显式授权时才可执行 Schema migration 或 Normalize 写回。Flush 前如权威输入可能已变化，必须重新读取并校验关联条件，防止旧结果写到新输入旁。
-- **验证与防复发**：交付验证必须超越语法、Runtime 和主流程：检查 `FORBIDDEN_LEGACY_CONTRACTS` 中的旧字段和旧 lineage 未进入正式 Schema、读取、派生或写回路径；核对 Source of Truth 优先级和 protected write ranges；用动态 sentinel 测试在处理后、Flush 前改变权威输入，确认系统会重新校验、阻止或重新计算，不会把旧结果静默写回。
+- **问题与适用范围**：从旧版本、reference implementation 或同版本同项目的 sibling implementation 恢复或复用性能、并发、重试、payload builder 等局部能力时，把 donor 当成整体修改底稿，使目标实现的 Schema、API input、Source of Truth、operator-owned authoritative inputs 或数据血缘契约被 donor 契约替换。即使两条路径属于同一平台并使用相同业务概念或字段名，不同 mutation、endpoint、operation 或 owner type 的嵌套 input object 也可能不同。
+- **可观察表现**：已废弃字段或旧 lineage 重新出现；人工权威输入被 Normalize、Schema migration 或整行写回改写；或 donor 的嵌套 payload 在目标 operation 触发 variables validation、unknown field、invalid input 等确定性 Schema 错误。局部能力可能通过语法或主流程验证，但数据契约已静默回退，或同一确定性错误被当成 transient failure 重试多次。
+- **根因与常见错误处理**：根因是 capability-donor contract leakage：没有把 donor 限定为明确列举的能力，因而复制局部实现时一并带入 donor 的字段、来源优先级、Normalize 规则、写入范围或 operation-specific input structure。常见错误处理是看到相同业务概念或字段名便默认 API input object 相同，只删除再次暴露的单个字段，或只做 syntax/runtime 和主流程验证；对 GraphQL variables validation 等确定性契约错误继续自动重试也只会放大重复诊断，不会改变结果。
+- **正确处理**：Current 是唯一修改底稿；任何 reference implementation 都只能是事先明确列举的 capability donor。开工前分别列出 `PRESERVE`、`IMPORT_ONLY` 和 `FORBIDDEN_DONOR_CONTRACTS`；不同 mutation、endpoint、operation 或 owner type 使用目标 operation 自己的 Schema 和 mutation-specific adapter，不默认透传 donor 的 nested structure。operator-owned authoritative inputs 默认 read-only，只有正式契约显式授权时才可执行 Schema migration 或 Normalize 写回。Flush 前如权威输入可能已变化，必须重新读取并校验关联条件。权限、Schema 和 variables validation 等确定性错误应 fail fast，不按 transient error 自动重试。
+- **验证与防复发**：交付验证必须超越语法、Runtime 和主流程：检查 `FORBIDDEN_DONOR_CONTRACTS` 中的 donor-only 字段、旧 lineage 和 nested keys 未进入目标 Schema、读取、派生、payload 或写回路径；核对 Source of Truth 优先级和 protected write ranges；针对目标 operation 执行最小真实 payload 或等价 Schema validation，确认 variables validation 成功；用动态 sentinel 测试权威输入变化时系统会重新校验、阻止或重新计算；注入确定性 Schema 错误，确认只失败一次且不会进入自动重试。
 
   ## 6. Notebook、文件和交付方式
 
@@ -851,13 +851,13 @@
 ### P062｜运行标签和正常返回掩盖真实副作用或失败
 
 - **状态**：已确认
-- **问题与适用范围**：Notebook、脚本、配置同步器或批处理使用 `DRY_RUN`、Preview、written、inserted、updated、SUCCESS 等标签，或 Cell 正常结束，但标签和返回状态没有准确反映实际外部副作用与业务结果。
-- **可观察表现**：标记为 Preview 或 Dry Run 的任务仍创建或修改工作表、字段映射、配置快照或 RunLog；摘要中的 written、inserted、updated 实际只是计划数量；异常被捕获后返回 FAILED 而不重新抛出，Notebook Cell 仍显示正常完成；phase 与实际写入行为不一致。
-- **根因与常见错误处理**：只把 Dry Run 理解为“不调用主要业务 API”，或用函数是否抛异常、Cell 是否结束和一个总状态代替对各类副作用与部分失败的判断。
+- **问题与适用范围**：Notebook、脚本、配置同步器或批处理使用 `DRY_RUN`、Preview、written、inserted、updated、SUCCESS 等标签，或 Cell 正常结束，但标签和返回状态没有准确反映实际外部副作用与业务结果；也包括主业务 mutation 已发生后，Result、RunLog 或其他 evidence sink 写入失败，使进程最终显示 FAILED 的场景。
+- **可观察表现**：标记为 Preview 或 Dry Run 的任务仍创建或修改工作表、字段映射、配置快照或 RunLog；摘要中的 written、inserted、updated 实际只是计划数量；异常被捕获后返回 FAILED 而不重新抛出，Notebook Cell 仍显示正常完成；或业务对象已经创建、修改或部分成功，但后置 Result/RunLog 因容量、格式或持久化错误失败，最终总状态掩盖真实业务副作用。
+- **根因与常见错误处理**：只把 Dry Run 理解为“不调用主要业务 API”，或用函数是否抛异常、Cell 是否结束和一个总状态代替对各类副作用与部分失败的判断；没有把业务 mutation、Result 写入、RunLog 写入和 process exit 视为独立状态层。常见错误处理是把 evidence persistence failure 直接解释为业务失败，并无条件重放可能非幂等的业务 mutation；或把完整 payload、error body 和 stack trace 塞入容量有限的 evidence sink，使诊断写入本身成为新的失败源。
 
-  常见错误处理：看到 `DRY_RUN=True` 就默认绝对只读；把 planned 数量命名为 written；只凭 Cell 的绿色完成状态宣布 Job 成功。
-- **正确处理**：为每个运行模式明确列出是否调用业务 API、修改业务数据、修改配置、创建输出、写日志及是否完全只读。结果字段严格区分 planned、validated、written、succeeded、failed 和 partial success；捕获异常时仍必须让最终 Job 状态和可观察失败信号一致。
-- **验证与防复发**：运行前后分别核对业务系统、业务表、配置表、输出对象和 RunLog；将摘要与真实差异逐项对账，并注入校验失败、执行失败和部分成功样例，确认进程状态、Job 状态、phase、计数和副作用一致。
+  常见错误处理：看到 `DRY_RUN=True` 就默认绝对只读；把 planned 数量命名为 written；只凭 Cell 的绿色完成状态宣布 Job 成功；或因为证据没有成功落盘便默认业务 mutation 可以安全重跑。
+- **正确处理**：为每个运行模式明确列出是否调用业务 API、修改业务数据、修改配置、创建输出、写日志及是否完全只读。结果字段严格区分 planned、validated、written、succeeded、failed 和 partial success，并独立表达 `BUSINESS_OPERATION_STATUS`、`RESULT_WRITE_STATUS`、`RUNLOG_WRITE_STATUS` 与 `PROCESS_EXIT_STATUS`。主业务写入后发生 evidence failure 时，先 reconciliation 当前业务系统，再决定是否重试；不得让 Result 或 RunLog 失败覆盖已经建立的业务结果，也不得无条件重放非幂等 mutation。容量有限的在线结果介质只保存 bounded summary 和代表样例，大体积 payload、error body 与 stack trace 进入适合的本地或 Runtime diagnostic channel。
+- **验证与防复发**：运行前后分别核对业务系统、业务表、配置表、输出对象和 RunLog；将摘要与真实差异逐项对账，并至少注入业务成功但 Result 失败、业务成功但 RunLog 失败、业务失败但 evidence 成功及部分业务成功样例，确认各层状态、phase、计数和副作用能够分别表达，后置证据失败不会触发无条件业务重放。另以超长诊断验证 bounded summary 不会使 evidence sink 因容量再次失败。
 
   防复发：运行模式名称、Notebook 文案和返回字段都不是副作用证据；必须以实际差异和分层结果验收。
 
