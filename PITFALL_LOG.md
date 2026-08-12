@@ -137,12 +137,12 @@
 
 - **状态**：已确认
 - **问题与适用范围**：Notebook 或脚本依赖 Secret，但解析逻辑只检查单一来源或有限默认路径，没有覆盖当前运行环境实际使用的受控来源；或多个 Runtime 对同一项目分别使用配置中的逻辑名称和本地规范化别名，却没有在统一认证边界完成名称适配。
-- **可观察表现**：代码报告目标 Secret 缺失，例如 `client_id`、`client_secret`、`refresh_token` 全部缺失，但实际 Secret 文件或变量已经存在；同一配置在一个 Runtime 可以认证，在另一个 Runtime 却因逻辑名称与本地规范化名称不同而失败。
+- **可观察表现**：代码报告目标 Secret 缺失，例如 `client_id`、`client_secret`、`refresh_token` 全部缺失，但实际 Secret 文件或变量已经存在；同一配置在一个 Runtime 可以认证，在另一个 Runtime 却因逻辑名称与本地规范化名称不同而失败；跨项目运行缺少当前 execution identity 自身的 Secret 时，流程可能试图改用目标项目或其他项目的 credential 继续运行。
 - **根因与常见错误处理**：把某个 Runtime 的单一路径、Secret 根目录或名称形式当成完整事实，没有按明确优先级处理显式值、Colab userdata、环境变量、受控子目录文件、dotenv 别名或当前项目白名单路径，也没有区分配置中的逻辑名称与本地认证边界允许的规范化别名。
 
-  常见错误处理：直接判定 Runtime、Kernel、OAuth 或凭据失效；复制一份 Secret 文件；在每个 API 调用点重复维护项目映射；扫描其他项目或猜测任意相似名称；在日志中输出 Secret 值以排查。
-- **正确处理**：依次区分 Runtime、路径解析、Secret 名称映射和 Token 刷新。按固定且可说明的优先级读取当前项目显式允许的来源；配置型 Runtime 保留精确逻辑名称，本地 Runtime 如需规范化别名，只在单一 Secret Loader 或认证边界根据规范化项目标识和固定后缀合同派生获批别名。受控文件发现应覆盖声明的子目录和别名，但不得扫描中央 Secrets 区域、猜测其他项目文件或混用相似名称；名称适配不得散落到各 API 调用点。日志只打印命中的来源类型、已检查的非敏感路径或缺失名称，绝不打印 Secret 值。
-- **验证与防复发**：分别对显式值、配置中的精确逻辑名称、本地规范化别名、缺失别名、项目隔离、环境变量、受控文件和 dotenv 别名执行加载测试；每次确认解析结果来自预期来源，其他项目的同名或相似配置不会被采用，日志只包含来源类型、非敏感路径或 Secret 名称，不包含值。
+  常见错误处理：直接判定 Runtime、Kernel、OAuth 或凭据失效；复制一份 Secret 文件；在每个 API 调用点重复维护项目映射；扫描其他项目或猜测任意相似名称；为绕过缺口修改 execution identity；静默转用目标项目、其他项目或 legacy credential；在日志中输出 Secret 值以排查。
+- **正确处理**：依次区分 Runtime、路径解析、Secret 名称映射和 Token 刷新。按固定且可说明的优先级读取当前 execution identity 显式允许的来源；配置型 Runtime 保留精确逻辑名称，本地 Runtime 如需规范化别名，只在单一 Secret Loader 或认证边界根据规范化项目标识和固定后缀合同派生获批别名。受控文件发现应覆盖声明的子目录和别名，但不得扫描中央 Secrets 区域、猜测其他项目文件或混用相似名称；名称适配不得散落到各 API 调用点。当前 execution identity 的正式 Secret 缺失时必须 fail closed，停止并请求补齐配置，不得通过改变执行身份或借用其他项目 credential 让流程继续。日志只打印命中的来源类型、已检查的非敏感路径或缺失名称，绝不打印 Secret 值。
+- **验证与防复发**：分别对显式值、配置中的精确逻辑名称、本地规范化别名、缺失别名、项目隔离、环境变量、受控文件和 dotenv 别名执行加载测试；每次确认解析结果来自预期来源，其他项目的同名或相似配置不会被采用。另模拟当前 execution identity 的 Secret 缺失但其他项目 credential 可用，确认流程在认证边界停止、不创建下游客户端、不切换身份且不尝试 legacy fallback；日志只包含来源类型、非敏感路径或 Secret 名称，不包含值。
 
   防复发：Secret 解析必须覆盖各 Runtime 明确允许的多来源入口，同时保持固定优先级和项目白名单边界，不能退化为单一路径假设或跨项目目录扫描。
 
@@ -1088,6 +1088,28 @@
 - **验证与防复发**：增加 connector、重复运行、资源级 Hash、浏览器自动化或额外审计前，必须能回答：“这一步将消除哪个尚未被覆盖、且会影响当前决策的真实风险？”没有明确答案时不增加该步骤。采用简化分工后，仍应核对目标操作或 callback 的必要结果，确认目标完成且没有引入额外权限面或控制层。
 
   防复发：验收强度与自动化范围必须由尚未覆盖的真实风险决定；低风险事实可由用户明确确认，需要本人判断的短交互默认由用户完成。
+
+### P085｜混淆 Execution Identity 与 Target Resource Identity
+
+- **状态**：已确认
+- **问题与适用范围**：跨项目 Job、共享 Registry、资源路由或认证边界中，同一个项目标识同时承担“谁在运行并解析认证”和“要访问哪个业务项目、站点或资源”两种职责。
+- **可观察表现**：为了访问另一项目的资源而改变执行项目标识或借用其 Secret；认证 Resolver 与资源 Resolver 对同一字段产生不同解释；一个简单的跨项目路由需求演变为双项目代码、额外框架或不必要的业务 package 依赖。
+- **根因与常见错误处理**：没有把 execution identity 与 target resource identity 建模为两个独立维度。常见错误处理是让单个 `PROJECT_CODE` 同时决定认证来源、Runtime provenance、Registry 查询和业务资源归属，或通过伪装执行项目来取得目标资源访问能力。
+- **正确处理**：execution identity 只负责 auth、Secret ownership 和 Runtime provenance；target resource identity 只负责目标 project、site、label 或 resource 的 Registry routing。两者可以不同，应通过各自明确参数和 Resolver 边界传递；跨项目消费本身不应强制建立业务 package 依赖。execution identity 缺少自身认证配置时按 P043 fail closed，不得以 target identity 替代。
+- **验证与防复发**：使用 execution identity 与 target identity 相同、不同、目标不存在及 execution Secret 缺失等组合测试；确认认证始终只解析执行方允许的 Secret，资源始终按目标身份路由，错误信息能够区分认证失败与目标解析失败，且实现不依赖 private import、路径注入或复制其他项目逻辑。
+
+  防复发：任何同时涉及跨项目认证和资源路由的 Contract，都必须分别声明 execution identity 与 target resource identity，并分别测试其 owner、输入和失败边界。
+
+### P086｜核心 Helper 可用但 Consumer Boundary 尚未闭合
+
+- **状态**：已确认
+- **问题与适用范围**：shared infrastructure 已提供 pure resolver、helper 或核心算法，但真实 consumer 尚无正式路径取得全部输入、加载配置或调用该能力，却提前把整体消费 Contract 或 blocker 判定为已完成。
+- **可观察表现**：核心函数单元测试通过且可以 public import，但 consumer 仍需 private business-module import、`sys.path` 注入、复制逻辑或手工拼装未归属的配置才能运行；状态报告显示 core ready，而真实 consumer flow 仍无法闭合。
+- **根因与常见错误处理**：把局部函数存在或 pure core ready 当成端到端可消费，遗漏 input provider、location/config source、auth ownership、安装边界和真实 caller。常见错误处理是用测试夹具或手工参数替代正式输入链，再据此关闭跨项目 blocker。
+- **正确处理**：分别报告 core readiness 与 consumer-boundary readiness。正式 closure 至少确认稳定 public import、全部必要输入的正规 provider、location/config source 的明确 owner、认证职责、可安装 package，以及不依赖 private import、路径注入或 copied logic 的 consumer 调用路径；任一必要环节缺失时 blocker 保持 open。
+- **验证与防复发**：除核心单元测试外，从正式 package 安装和 public API 开始执行 offline end-to-end consumer flow，覆盖配置定位、输入加载、解析和结果返回；再以缺失 provider、位置、认证或目标配置的样例确认失败发生在明确边界，并核对真实 consumer 不引用 private 业务模块、不修改 `sys.path`、不复制核心逻辑。
+
+  防复发：shared infrastructure 的验收必须同时列出 pure core 与 consumer loading contract；只有真实 consumer 能通过正式输入、安装和 public boundary 完成端到端调用时，才能关闭消费 blocker。
 
 ## 7. 网络与运行环境
 
