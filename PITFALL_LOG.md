@@ -5,7 +5,7 @@
 > 不记录：普通个人偏好、项目当前状态、项目专属下一步、一次性 ID、Secret 值、大段原始日志或尚未验证的担忧。
 >
 > 状态：Current
-> 最后更新：2026-08-01
+> 最后更新：2026-08-13
 
 ## 1. 使用与维护规则
 
@@ -785,12 +785,12 @@
 
 - **状态**：已确认
 - **问题与适用范围**：代码、Notebook、数据管道、正式文档和发布资产需要同时判断 Current 身份、证据成熟度、用户验收和 Git 状态时。
-- **可观察表现**：文件被标记为 Current 就被宣称已经验收或冻结；新版因缺少同等级运行证据被撤销 Current；旧版证据被自动继承给新版；工作树干净被当作全部文档状态已经同步。
+- **可观察表现**：文件被标记为 Current 就被宣称已经验收或冻结；新版因缺少同等级运行证据被撤销 Current；旧版证据被自动继承给新版；工作树干净被当作全部文档状态已经同步。第三方异步导入仍处于 processing、scanning 或等价中间态时，临时零计数、空报表或已完成传输也可能被误判为最终失败或业务可用。
 - **根因与常见错误处理**：把“当前权威入口”“验证证据”“用户确认”“Git 提交”和“文档状态”压缩成一个状态。
 
   常见错误处理：用其中任一状态替代其他状态，或把无法绑定当前版本的历史证据描述成当前版本的精确证据。
-- **正确处理**：分别记录 Current 身份、Evidence Maturity、用户验收、Git 状态和文档状态。Current 可以存在 `EVIDENCE_GAP`；旧证据只能证明其绑定的版本。Runtime copy、Notebook 字节身份和 dirty worktree 分别按 P052/P054、P048 和 P047 处理。
-- **验证与防复发**：逐项列出上述状态并核对来源，确认没有一项被另一项替代；发生合并或冻结后，定向检查适用权威文档中的分支、revision、状态和 Next Action。
+- **正确处理**：分别记录 Current 身份、Evidence Maturity、用户验收、Git 状态和文档状态。Current 可以存在 `EVIDENCE_GAP`；旧证据只能证明其绑定的版本。第三方异步 ingestion 还应分别记录 transport/delivery、accepted、processing、item validation 和 ready/business-usable；中间态不能自动升级为终态。Runtime copy、Notebook 字节身份和 dirty worktree 分别按 P052/P054、P048 和 P047 处理。
+- **验证与防复发**：逐项列出上述状态并核对来源，确认没有一项被另一项替代；异步 ingestion 等待并核对目标系统定义的终态或业务可用性证据，不用处理中间态的临时零计数下结论；发生合并或冻结后，定向检查适用权威文档中的分支、revision、状态和 Next Action。
 
   防复发：任何“完成、验收、冻结或 Current”结论都必须说明它具体指哪一层状态。
 
@@ -1110,6 +1110,33 @@
 - **验证与防复发**：除核心单元测试外，从正式 package 安装和 public API 开始执行 offline end-to-end consumer flow，覆盖配置定位、输入加载、解析和结果返回；再以缺失 provider、位置、认证或目标配置的样例确认失败发生在明确边界，并核对真实 consumer 不引用 private 业务模块、不修改 `sys.path`、不复制核心逻辑。
 
   防复发：shared infrastructure 的验收必须同时列出 pure core 与 consumer loading contract；只有真实 consumer 能通过正式输入、安装和 public boundary 完成端到端调用时，才能关闭消费 blocker。
+
+### P087｜把 Secret Resolver 返回对象字符串化为凭据
+
+- **状态**：已确认
+- **问题与适用范围**：认证或外部客户端通过 Secret Resolver、SDK 或 credential API 取得带状态和元数据的 result/wrapper object，调用方却把整个对象当成 credential scalar value；适用于密码、Token、API key 和其他受控 Secret 的解析边界。
+- **可观察表现**：网络和目标端点可达，但真实认证返回 credential error、authentication failure 或等价拒绝；Resolver 调用本身成功且对象非空，日志或调试输出却不能证明传给下游的是正式 Secret value。改为读取 wrapper 的正式 value property 后，同一认证边界成功。
+- **根因与常见错误处理**：没有确认 Resolver 或 SDK 的正式返回类型，使用 `str(result)`、对象 repr 或非正式字段猜测凭据值。常见错误处理是把失败归因于用户名、网络或远端服务，或只验证 wrapper 非空、代码语法和 mock 调用通过，同时为排查而打印 Secret value。
+- **正确处理**：先查明 Resolver/SDK 的正式返回类型和 documented value contract，显式读取正式 value/property 并执行非空检查；不得用字符串化 wrapper 猜测值，也不得记录 Secret value。类型或 value contract 不明确时停止并核对当前实现或官方接口，不在调用方补造字段。
+- **验证与防复发**：测试 wrapper 已解析、正式 value 已提取且非空，并从真实最小认证边界验证客户端能够认证；日志仅保留来源类型、状态和非敏感错误，不包含 Secret value。单元测试同时覆盖 wrapper、空 value 和错误类型，确保整个对象不会被传给下游。
+
+### P088｜正式 Preview 混入阻断失败对象
+
+- **状态**：已确认
+- **问题与适用范围**：Feed、批量发布、同步、导入或价格更新流程把已经完成映射或中间处理的对象集合直接命名为正式 Preview，而该集合仍包含因 blocking validation 不会进入最终发布的对象。
+- **可观察表现**：Preview 展示缺失必填键、无效字段或其他已知阻断对象，但正式输出会排除这些对象；操作者无法从 Preview 判断实际将发布什么，Preview 计数和正式候选集合也不一致。
+- **根因与常见错误处理**：把调试过程中的 mapped/intermediate set 与操作者理解的 publishable candidate set 混为同一语义。常见错误处理是保留失败对象以便排查，却没有把 failure evidence 与正式 Preview 分层，或只验证 Final Feed 而不核对 Preview contract。
+- **正确处理**：先明确 Preview contract。命名为正式或 publishable Preview 时，`Preview = valid/final candidate set`；blocking objects 必须在进入 Preview 前排除，并进入独立 failures/validation evidence。若确需展示中间对象，应使用明确不同的名称，不能冒充正式 Preview。
+- **验证与防复发**：用包含阻断失败对象和有效对象的样例核对 Preview、最终候选和 failure list：Preview 与最终可发布集合的身份键和计数一致，阻断对象只存在于 failure evidence，修复后才进入两者。运行摘要分别报告输入、失败、Preview 和最终候选数量。
+
+### P089｜为满足唯一键要求而静默保留第一条重复记录
+
+- **状态**：已确认
+- **问题与适用范围**：Feed、同步、导入、合并或批量写入的目标系统要求唯一键，而来源数据存在重复；实现为了快速满足技术约束直接执行 `drop_duplicates(keep="first")` 或等价 first-row dedupe。
+- **可观察表现**：输出在技术上满足唯一键，但未说明为何第一条具有权威性；合法业务重复、状态优先级和冲突记录被静默丢弃，操作者也缺少 reconciliation evidence 判断哪些记录被保留或排除。
+- **根因与常见错误处理**：把目标系统的唯一性约束误当成来源重复的业务裁决规则，没有先确认重复是否合法、记录 authority、状态优先级和无法裁决时的失败边界。常见错误处理是依赖输入顺序决定胜者，或只检查最终 `nunique` 而不检查被删除记录的业务含义。
+- **正确处理**：先显式定义唯一键和去重合同：判断重复是否业务合法、哪条记录具有 authority、是否存在可验证的状态或时间优先级，以及无权威规则时是否应整组隔离失败。只有正式业务规则明确授权时才按确定性顺序选取记录；无法安全裁决的重复进入 failure evidence，并保留可对账的冲突成员和处理原因。
+- **验证与防复发**：测试合法重复、具有明确优先级、无可用权威记录和普通冲突等样例；核对最终键唯一、选择结果符合正式规则、无法裁决的记录未被静默保留或删除，并确认输入、输出、冲突组和 failure evidence 能完整 reconciliation。
 
 ## 7. 网络与运行环境
 
