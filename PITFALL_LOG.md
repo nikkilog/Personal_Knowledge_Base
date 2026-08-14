@@ -63,10 +63,14 @@
 - **正确处理**：写入 Adapter 先获取目标工作表，不存在时按正式规则自动创建；动态布局遵循 `calculate → resize → validate`：先计算包含表头、全部动态区块或本次追加批次的所需结束行列数；不足时用 `resize()`、`add_rows()` 或 `batchUpdate` 先扩展网格，扩容应留出合理余量，再校验容量并分块执行 values update。若是全量替换，先清空目标区域但不要误删 Sheet。本地数据应先成功落盘；线上同步失败必须明确记录，但不得损坏或回滚已成功写入的本地 Source of Truth。
 - **验证与防复发**：读取 Sheet properties，分别在目标工作表不存在、行数不足和列数不足时验证自动创建与扩容；确认网格尺寸不小于计划写入范围，写入后核对本地行数、线上行数、实际行列数、最后一个目标单元格和同步状态，并连续追加多批确认不会在下一个边界立即复发。
 
-### P005｜写完以后回读比对全部 mismatch
+### P005｜Google Sheets 布尔值文本表现造成假的精确回读 mismatch
 
-- **状态**：已废弃（资格不足）
-- **说明**：相关 mismatch 现象曾发生，但原记录没有建立唯一根因，处理方式也未完成可重复验证，因此不作为正式通用 Pitfall。P005 编号永久保留，不再复用；如以后取得充分证据，应在本编号原位重建完整条目。
+- **状态**：已确认
+- **问题与适用范围**：使用 gspread 或 Google Sheets API 将包含 Python `bool` 的内存 expected matrix 写入工作表，再通过 `get_all_values()` 等文本回读接口执行 exact write-back reconciliation。
+- **可观察表现**：内存 expected 值为 `True` / `False`，回读 actual 值为 `TRUE` / `FALSE`；业务数据已经正确写入，但普通字符串精确比较将这些布尔等价值判为 mismatch，使 reconciliation 错误失败。
+- **根因与常见错误处理**：写入和回读边界对同一布尔语义使用不同文本表现：Python expected matrix 保留布尔对象，而 Sheets 文本回读层返回大写字符串。常见错误处理包括因假 mismatch 重写数据、关闭 exact reconciliation、普遍放宽所有字段比较、对所有字符串统一改变大小写，或把这种序列化表现差异与真实非布尔数据异常混为一谈。
+- **正确处理**：只在 reconciliation 比较边界对布尔语义做窄范围规范化：Python `True` 与文本 `true` / `TRUE` 统一为 `TRUE`，Python `False` 与文本 `false` / `FALSE` 统一为 `FALSE`；其他值继续使用原有严格比较规则。不得为了修复布尔表现差异而普遍降低 reconciliation 严格度。
+- **验证与防复发**：分别确认 `True` 与 `TRUE`、`False` 与 `FALSE` 以及文本大小写变体能够通过；注入非布尔异常值，确认仍会触发 mismatch；再运行完整写入与回读流程，确认 exact reconciliation 通过且整体任务成功。凡使用内存 expected matrix 对 Sheets 文本回读做精确校验的流程，都应固定覆盖布尔等价和非布尔异常两类回归测试。
 
 ### P006｜默认新建 Tab，导致同类输出越来越多
 
