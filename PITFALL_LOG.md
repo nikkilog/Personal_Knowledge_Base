@@ -1142,6 +1142,15 @@
 - **正确处理**：先显式定义唯一键和去重合同：判断重复是否业务合法、哪条记录具有 authority、是否存在可验证的状态或时间优先级，以及无权威规则时是否应整组隔离失败。只有正式业务规则明确授权时才按确定性顺序选取记录；无法安全裁决的重复进入 failure evidence，并保留可对账的冲突成员和处理原因。
 - **验证与防复发**：测试合法重复、具有明确优先级、无可用权威记录和普通冲突等样例；核对最终键唯一、选择结果符合正式规则、无法裁决的记录未被静默保留或删除，并确认输入、输出、冲突组和 failure evidence 能完整 reconciliation。
 
+### P090｜把 Merchant API Developer Registration 当成日常认证步骤
+
+- **状态**：部分确认
+- **问题与适用范围**：使用 Service Account 或其他已取得身份凭据的流程调用 Merchant API 时，调用方的 Google Cloud 项目尚未完成 Merchant developer registration；适用于新环境接入、项目迁移和重复运行的 Merchant API Job。
+- **可观察表现**：身份认证本身已经建立，但正常 API 请求仍返回项目未注册类的 401；执行 developer registration 后返回成功；对同一项目重复注册则返回已存在或冲突类的 409。
+- **根因与常见错误处理**：把 Merchant 用户或账号访问权限、调用身份认证和 Google Cloud 项目的 developer registration 混成同一层，并把一次性平台 bootstrap 放进重复运行的业务 Notebook 或 Job。常见错误处理是遇到未注册错误便反复重试、每次运行都自动注册，或把重复注册冲突继续解释成凭据失效。
+- **正确处理**：分别检查 Merchant 侧用户或账号访问权限、调用身份认证和 Google Cloud 项目 developer registration。只有平台明确报告项目未注册时，才在受控的环境初始化步骤中完成一次 registration；该动作不得进入周期性业务流程。重复运行的 Job 应识别未注册状态并返回具体 setup error，不自动注册，也不把确定性配置错误交给普通重试器。
+- **验证与防复发**：registration 成功后，使用同一正式身份执行一个最小、只读的正常 Merchant API 请求；只有该请求成功，才能把本条升级为“已确认”。当前已观察到未注册失败、首次 registration 成功和重复 registration 冲突，因此状态保持“部分确认”。环境接入清单应独立记录 registration 是否完成，周期性 Job 只检查并报告缺失状态。
+
 ## 7. 网络与运行环境
 
 ### P028｜TUN 与系统代理双开导致超时或回环
