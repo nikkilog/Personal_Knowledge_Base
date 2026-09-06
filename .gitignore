@@ -1,0 +1,15 @@
+# macOS
+.DS_Store
+
+# 临时文件
+*.tmp
+*.bak
+*.swp
+
+# 本地环境与敏感信息
+.env
+_Secrets/
+Secrets/
+*credentials*.json
+*service_account*.json
+*token*.json
