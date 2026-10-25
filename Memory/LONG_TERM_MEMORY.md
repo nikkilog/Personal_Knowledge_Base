@@ -3,7 +3,7 @@
 ```text
 MEMORY_ROLE: DERIVED_HIGH_FREQUENCY_PROJECTION
 STATUS: CURRENT
-LAST_REVIEWED: 2026-08-23
+LAST_REVIEWED: 2026-10-25
 DETAILED_AUTHORITY: Personal_Knowledge_Base/Knowledge/
 ```
 
@@ -72,6 +72,14 @@ DETAILED_AUTHORITY: Personal_Knowledge_Base/Knowledge/
 - 来源：本次 Workspace 迁移对话中的用户明确指令；`Knowledge/PITFALL_LOG.md` P039、P041、P047。
 - 事实状态：`USER_CONFIRMED`
 - 最后确认：`2026-08-23`
+
+## LTM-009｜Google OAuth 固定配置键名
+
+- 记忆：后续项目沿用用户确认的 `CAH_DRIVE_CLIENT_ID`、`CAH_DRIVE_CLIENT_SECRET`、`CAH_DRIVE_REFRESH_TOKEN`；`CAH` 不随目标项目名称替换。
+- 行动：接入前核对项目 Current、正式来源和授权范围；不凭这项偏好推定凭据可用或自动迁移既有配置。
+- 来源：`Knowledge/PERSONAL_CONTEXT.md` §7。
+- 事实状态：`USER_CONFIRMED`
+- 最后确认：`2026-10-25`
 
 ## 维护规则
 
