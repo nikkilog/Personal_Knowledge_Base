@@ -27,25 +27,27 @@ Evidence: 根目录 `AGENTS.md` §1–§3
 Last Confirmed: 2026-08-23
 
 AI_WORKSPACE --contains--> ACCOUNT_BOOTSTRAP
-Owner: 01_ACCOUNT_BOOTSTRAP/
-Evidence: 根目录 `AGENTS.md` §1
-Last Confirmed: 2026-08-23
+Owner: 01_ACCOUNT_BOOTSTRAP/README.md
+Evidence: 根目录 `00_START_HERE.md` §根目录各层职责；`01_ACCOUNT_BOOTSTRAP/README.md`
+Last Confirmed: 2026-10-26
 
 PKB_MEMORY --derived_from--> PKB_KNOWLEDGE
 Owner: Personal_Knowledge_Base/PROJECT.md
 Evidence: `Personal_Knowledge_Base/AGENTS.md` §5
 Last Confirmed: 2026-08-23
 
-ACCOUNT_BOOTSTRAP --derived_from--> PKB_MEMORY
-Owner: 01_ACCOUNT_BOOTSTRAP/
-Evidence: 根目录 `AGENTS.md` §1
-Last Confirmed: 2026-08-23
+ACCOUNT_BOOTSTRAP --routes_initialization_to--> PROMPT_LIBRARY
+Owner: 02_PROMPT_LIBRARY/02_Global/AI_Workspace_Entry.md
+Evidence: `01_ACCOUNT_BOOTSTRAP/README.md`；`02_PROMPT_LIBRARY/02_Global/AI_Workspace_Entry.md`
+Last Confirmed: 2026-10-26
 
 WORKSPACE_CONTROL --routes_to--> PROJECTS
 Owner: Workspace_Control/PROJECTS.md
 Evidence: 根目录 `AGENTS.md` §1–§2
 Last Confirmed: 2026-08-23
 ```
+
+Bootstrap 过去由 PKB Memory 派生账号初始化材料；旧材料已归档，这条旧派生关系不再是当前初始化的执行依赖。
 
 ## 业务与能力关系
 

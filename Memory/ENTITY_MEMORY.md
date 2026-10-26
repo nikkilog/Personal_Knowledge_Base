@@ -48,13 +48,13 @@ LAST_REVIEWED: 2026-10-25
 
 - Canonical Name: `Account Bootstrap`
 - Aliases: `01_ACCOUNT_BOOTSTRAP`
-- Type: Workspace component / Derived account initialization layer
-- Definition: 从完成后的 Workspace 与 Memory 提炼两个 GPT 账号共用的初始化材料。
-- Not This: 不是第二套知识 Source of Truth，不能反向覆盖 Workspace。
-- Owner: `01_ACCOUNT_BOOTSTRAP/`
-- Relations: derives from PKB Memory and Knowledge; initializes GPT accounts。
-- Evidence: 根目录 `AGENTS.md` §1
-- Last Confirmed: `2026-08-23`
+- Type: Workspace component / Compatibility navigation and initialization history
+- Definition: 保留旧账号初始化材料的历史，并从兼容 README 指向 Prompt Library 的正式新 AI / 新账号入口。
+- Not This: 不是现用初始化正文的 owner，不是第二套知识 Source of Truth；不能自动同步两个账号的 Memory、权限或文件访问。
+- Owner: `01_ACCOUNT_BOOTSTRAP/README.md`；正式初始化正文由 `02_PROMPT_LIBRARY/02_Global/AI_Workspace_Entry.md` 持有。
+- Relations: routes initialization to Prompt Library; former Memory-derived account materials are archived history, not a current execution dependency。
+- Evidence: 根目录 `00_START_HERE.md` §根目录各层职责；`01_ACCOUNT_BOOTSTRAP/README.md`；`02_PROMPT_LIBRARY/02_Global/AI_Workspace_Entry.md`
+- Last Confirmed: `2026-10-26`
 
 ## PKB
 
