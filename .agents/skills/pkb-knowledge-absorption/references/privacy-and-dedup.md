@@ -30,13 +30,13 @@ Evaluate candidates in this order:
 4. `ALREADY_COVERED`
 5. `NO_ACTION`
 
-Do not create a new entry merely because wording differs. Preserve the trigger, action, limitation, and verification method; do not abstract until the rule becomes vague.
+Do not create a new entry merely because wording differs. Search the correct detailed owner, including the Coding owner for technical methods, and check contrary wording. When new evidence corrects an old rule, update the old text and affected pointers in place. Preserve the trigger, action, limitation, and verification method; do not abstract until the rule becomes vague.
 
 ## Source and Evidence
 
 A Source Package is a transport format, not independent evidence.
 
-- `USER_CONFIRMED` requires a clear user statement.
+- `USER_CONFIRMED` requires a clear user statement. An old file label, commit, or confident Source Package wording does not substitute for the underlying statement when its attribution is disputed.
 - `USER_PROVIDED` means the user supplied the underlying fact; it does not automatically confirm an AI interpretation.
 - `OBSERVED_WORKFLOW` requires concrete execution or repeated workflow evidence.
 - `INFERENCE` and `NEEDS_CONFIRMATION` must not be written as formal PKB knowledge.

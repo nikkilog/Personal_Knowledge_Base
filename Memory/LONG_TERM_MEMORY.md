@@ -41,19 +41,19 @@ DETAILED_AUTHORITY: Personal_Knowledge_Base/Knowledge/
 - 事实状态：`USER_PROVIDED`
 - 最后确认：`2026-08-13`
 
-## LTM-005｜用户本人优先执行本地动作
+## LTM-005｜本地动作执行者的历史记录（适用范围待确认）
 
-- 记忆：如果一个本地动作可以由用户简单、安全地完成，优先给用户精确步骤并让用户执行；批量扫描、机械验证、重复处理或人工高风险步骤再建议 Codex。
-- 行动：需要本地执行时先说明执行者、范围、备份、验证与停止条件，不默认替用户操作。
-- 来源：本次 Workspace 迁移对话中的用户明确指令；中央 Operating Prompt 的 `USER_FIRST` 规则。
-- 事实状态：`USER_CONFIRMED`
-- 最后确认：`2026-08-23`
+- 历史记录：旧摘要主张“简单、安全的本地动作优先由用户执行”。现有可查来源是中央 Operating Prompt 的 `USER_FIRST` 文字，未定位可独立核查的原始用户表述；这不能证明它普遍适用于已授权的 Codex 工作，更不能延伸为默认由用户完成 OAuth 点击。
+- 当前行动：以当前明确授权、项目规则及实际风险决定执行者；已授权且能安全完成的本地改写继续执行。只在决定会实质改变结果或风险时请求最小确认。历史主张的普遍适用范围待用户确认，在此之前不作为强制行动门。
+- 来源：`02_PROMPT_LIBRARY/01_Operating/Memory_PKB_Absorption.md` 的 `USER_FIRST`（旧主张的次级来源）；本轮可执行边界见 `Knowledge/PERSONAL_CONTEXT.md` §7 与 `Knowledge/Coding/CODEX_COLLABORATION_AND_LOGIC_PREFERENCES.md` §5.2。
+- 事实状态：`NEEDS_CONFIRMATION`（仅旧主张的普遍适用范围）。
+- 历史标注日期：`2026-08-23`；最后核对：`2026-10-25`，原始确认日期未核实。
 
 ## LTM-006｜外部交付文件名必须唯一
 
 - 记忆：用户上传名、旧交付名和任何新版本的外部下载名不得相同；每次交付都要用可明确区分的新名称。
 - 行动：外部交付名包含主题、阶段/版本、状态和时间标识；正式仓库 Current 的稳定身份不因此改变。
-- 来源：`Knowledge/PERSONAL_CONTEXT.md` §8；`Knowledge/PITFALL_LOG.md` P060；本次迁移对话中的用户重复确认。
+- 来源：`Knowledge/PERSONAL_CONTEXT.md` §8；`Knowledge/Coding/CODEX_COLLABORATION_AND_LOGIC_PREFERENCES.md` §12；`Knowledge/PITFALL_LOG.md` P060。
 - 事实状态：`USER_CONFIRMED`
 - 最后确认：`2026-08-23`
 
@@ -69,7 +69,7 @@ DETAILED_AUTHORITY: Personal_Knowledge_Base/Knowledge/
 
 - 记忆：提炼、重构或迁移不得以摘要替代详细原文；旧资料不能因为看起来过时而静默丢弃。
 - 行动：先保护原文和恢复证据，再分类、提炼或生成 Current；冲突和取舍显式记录。
-- 来源：本次 Workspace 迁移对话中的用户明确指令；`Knowledge/PITFALL_LOG.md` P039、P041、P047。
+- 来源：`Knowledge/PERSONAL_CONTEXT.md` §4、§8；`Knowledge/PITFALL_LOG.md` P039、P041、P047。
 - 事实状态：`USER_CONFIRMED`
 - 最后确认：`2026-08-23`
 
@@ -77,7 +77,23 @@ DETAILED_AUTHORITY: Personal_Knowledge_Base/Knowledge/
 
 - 记忆：后续项目沿用用户确认的 `CAH_DRIVE_CLIENT_ID`、`CAH_DRIVE_CLIENT_SECRET`、`CAH_DRIVE_REFRESH_TOKEN`；`CAH` 不随目标项目名称替换。
 - 行动：接入前核对项目 Current、正式来源和授权范围；不凭这项偏好推定凭据可用或自动迁移既有配置。
-- 来源：`Knowledge/PERSONAL_CONTEXT.md` §7。
+- 来源：`Knowledge/Coding/CODEX_COLLABORATION_AND_LOGIC_PREFERENCES.md` §5.6。
+- 事实状态：`USER_CONFIRMED`
+- 最后确认：`2026-10-25`
+
+## LTM-010｜Notebook 运行与认证
+
+- 记忆：Notebook 数量由业务任务决定，同一业务逻辑按要求支持 Colab 与本地已有环境；日常认证优先沿用既有非交互配置，不能把初次授权写成用户的日常点击偏好。
+- 行动：先查项目运行说明和代码，缺口具体指出；分别报告两端支持目标与实际验收，不凭 PKB 宣称项目已跑通。
+- 来源：`Knowledge/Coding/CODEX_COLLABORATION_AND_LOGIC_PREFERENCES.md` §5；`Knowledge/PERSONAL_CONTEXT.md` §7。
+- 事实状态：`USER_CONFIRMED`
+- 最后确认：`2026-10-25`
+
+## LTM-011｜数据文件与公式交付
+
+- 记忆：普通数据优先 UTF-8 CSV；必要 Excel 功能才用 XLSX；展示或可读性确有需要才做格式和渲染。同类公式从首个适用单元格设置，再填充或扩展，不逐行写入。
+- 行动：按实际风险核对字段、公式、编码和结构，并遵守本轮指定格式。
+- 来源：`Knowledge/Coding/CODEX_COLLABORATION_AND_LOGIC_PREFERENCES.md` §5.7、§12；`Knowledge/PERSONAL_CONTEXT.md` §6。
 - 事实状态：`USER_CONFIRMED`
 - 最后确认：`2026-10-25`
 

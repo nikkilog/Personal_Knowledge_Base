@@ -119,7 +119,7 @@ Use:
 - `INFERENCE`
 - `NEEDS_CONFIRMATION`
 
-Only `USER_CONFIRMED`, `USER_PROVIDED`, or a concretely evidenced `OBSERVED_WORKFLOW` may become formal candidates.
+Only `USER_CONFIRMED`, `USER_PROVIDED`, or a concretely evidenced `OBSERVED_WORKFLOW` may become formal candidates. Treat the user's statement, a project-limited decision, an observed workflow, and an AI summary as distinct evidence. A historic “confirmed” label or commit does not alone establish the user's original words; disputed attribution needs a narrower statement or `NEEDS_CONFIRMATION`.
 
 `INFERENCE` and `NEEDS_CONFIRMATION` may be reported but must not be written into PKB.
 

@@ -11,7 +11,7 @@ Use three distinct layers:
 2. `PROJECT_CURRENT`: current code, formal project documentation, configuration contracts, Secret names, module paths, schemas, Runtime adapters, and validated reference implementations.
 3. `CURRENT_SOURCE`: the current Chat, Source Package, user-supplied file, or current Codex evidence and authorization.
 
-PKB does not prove a project's current implementation. A durable rule that says where or how to verify project facts may belong in `Knowledge/PERSONAL_CONTEXT.md` or `AGENTS.md`; the concrete project fact itself remains `PROJECT_ONLY`.
+PKB does not prove a project's current implementation. A durable rule that says where or how to verify project facts may belong in the relevant Knowledge owner or `AGENTS.md`; the concrete project fact itself remains `PROJECT_ONLY`.
 
 When the current implementation matters, record the project Current or user-supplied reference that established it. If that evidence is absent, use `NEEDS_CONFIRMATION`, `KEEP_IN_PROJECT_ONLY`, or `NO_ACTION`; never invent a plausible contract from general experience.
 
@@ -20,6 +20,7 @@ The GitHub mirror is not an owner file and must never receive direct edits from 
 ## Knowledge Types
 
 - `PERSONAL_CONTEXT`
+- `CODING_PREFERENCE`
 - `PITFALL`
 - `PKB_OPERATING_RULE`
 - `PROJECT_ONLY`
@@ -46,9 +47,13 @@ Prefer merge, then update, then create. If fully covered, use `ALREADY_COVERED` 
 
 ### `Knowledge/PERSONAL_CONTEXT.md`
 
-Store durable personal background, working preferences, communication preferences, output and acceptance habits, and cross-project collaboration preferences.
+Store durable personal background, communication, decision, general collaboration, and output preferences. Technical detail may have a short pointer to the Coding owner.
 
 Do not store temporary project state, branch, commit, run ID, resource ID, project version, or project next step.
+
+### `Knowledge/Coding/CODEX_COLLABORATION_AND_LOGIC_PREFERENCES.md`
+
+Store detailed reusable coding, Notebook, environment, authentication, data, formula, validation, and technical delivery principles. Search it for synonyms and contrary rules before adding a candidate. A project-specific implementation contract remains in that project's Current.
 
 ### `Knowledge/PITFALL_LOG.md`
 
@@ -102,7 +107,7 @@ When detailed knowledge moves to a better owner:
 
 ## Memory Projection
 
-Detailed ownership remains singular. After a confirmed detailed-owner change, optionally refresh exactly the affected projection:
+Detailed ownership remains singular. After a confirmed detailed-owner change, review exactly the affected projection and update it only when its meaning, source, or routing changed:
 
 - `Memory/LONG_TERM_MEMORY.md`: durable action-changing memory;
 - `Memory/SHORT_TERM_MEMORY.md`: temporary cross-project awareness with expiry;

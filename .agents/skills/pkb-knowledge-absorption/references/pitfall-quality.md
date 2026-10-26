@@ -26,7 +26,7 @@ When a Pitfall concerns an invented, stale, or mismatched project contract:
 
 ## Required Content
 
-A current Pitfall must preserve:
+A current Pitfall must preserve the material information available for its actual incident:
 
 - status;
 - problem and reusable scope;
@@ -35,7 +35,7 @@ A current Pitfall must preserve:
 - correct handling;
 - verification and prevention.
 
-Do not create vague reminders such as “be careful,” “remember to check,” or “there may be a problem.”
+Do not force every historical entry into identical length or demote it solely because an old layout lacks a newer field label. Revisit the evidence when its attribution or behavior would change. Do not create vague reminders such as “be careful,” “remember to check,” or “there may be a problem.”
 
 ## Merge and Split
 

@@ -31,7 +31,7 @@ State the relevant existing owner and whether the candidate is already covered.
 
 ### Candidate Decisions
 
-For each material candidate include only:
+For each material candidate whose disposition needs explanation, include only:
 
 - candidate;
 - fact level;
@@ -43,13 +43,13 @@ For each material candidate include only:
 
 ### Bounded Execution Package
 
-Provide one recommended set of exact local files and entries that may change after confirmation. State `MIRROR_SYNC_MODE` separately; mirror synchronization is never implied by file-edit approval.
+Provide one recommended set of local files and entries when a decision is still needed. If the user already authorized a bounded direct edit, execute after the safe gate and report the actual changes. State `MIRROR_SYNC_MODE` separately; mirror synchronization is never implied by file-edit approval.
 
 ### No-action Items
 
 Identify items that are already covered, project-only, unverified, temporary, sensitive, or without durable value.
 
-Phase one must not modify, delete, stage, or commit.
+An `AUDIT_ONLY` or pending `AUDIT_THEN_CONFIRM` phase must not modify, delete, stage, or commit. Report `AUDITED_NO_WRITE` or `WAITING_FOR_DECISION`; an audit finding is not a completed edit.
 
 Expand into detailed evidence tables only when a deletion, major compression, cross-file move, disputed classification, or other high-risk change requires it.
 
@@ -62,7 +62,9 @@ Expand into detailed evidence tables only when a deletion, major compression, cr
 
 ## Final Report
 
-Report every field, using `NONE`, `NO`, or `N/A` where appropriate:
+For routine work, report concisely: actual source and scope, changed files and important movement or correction, validation performed and its limits, unresolved items, branch/HEAD/worktree, and whether stage, commit, push, or mirror sync happened. Distinguish audit, edited, validated, committed, and mirrored states. Show a candidate and destination table only when it helps explain a disputed move, major compression, or incomplete decision.
+
+When an external caller explicitly requires the legacy machine-readable contract, use the following fields; otherwise do not print a long list of `NONE` or `N/A` placeholders:
 
 ```text
 PERSONAL_KNOWLEDGE_REVIEWED:
@@ -73,6 +75,7 @@ KNOWLEDGE_FOCUS:
 EXECUTION_RESULT:
 FILES_MODIFIED:
 PERSONAL_CONTEXT_UPDATED:
+CODING_OWNER_UPDATED:
 PITFALL_LOG_UPDATED:
 PKB_AGENTS_UPDATED:
 PKB_PROJECT_UPDATED:

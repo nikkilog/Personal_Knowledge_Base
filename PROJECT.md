@@ -1,7 +1,7 @@
 # Personal Knowledge Base
 
 > 状态：Current
-> 最后复核：2026-08-23
+> 最后复核：2026-10-25
 
 ## 1. 仓库目的
 
@@ -64,7 +64,7 @@ Pitfall 编号长期稳定；条目合并、迁移或废弃时不得重新编号
 
 ### `Knowledge/Coding/CODEX_COLLABORATION_AND_LOGIC_PREFERENCES.md`
 
-从原 `AI使用` 完整保留的详细协作与逻辑偏好；需要时查阅，不要求每次对话全文加载。
+跨项目代码、Notebook、运行环境、认证、数据、公式、验证与技术交付原则的详细 owner；按任务检索相关章节。`PERSONAL_CONTEXT.md` 对这些主题只保留短摘要与指针。
 
 ### `90_Archive/`
 
@@ -79,7 +79,7 @@ Pitfall 编号长期稳定；条目合并、迁移或废弃时不得重新编号
 1. 读取 `AGENTS.md`，确定仓库边界和强制规则；
 2. 读取 `PROJECT.md`，确认当前正式资产、镜像边界和文件职责；
 3. 按任务需要读取相关 `Memory/` 投影；
-4. 需要详细背景或规则时读取 `Knowledge/PERSONAL_CONTEXT.md` 或 `Knowledge/Coding/`；
+4. 需要详细个人背景或一般偏好时读取 `Knowledge/PERSONAL_CONTEXT.md`；技术协作和实现方法读 `Knowledge/Coding/`；
 5. 按任务涉及的问题类型查阅 `Knowledge/PITFALL_LOG.md`。
 
 各文件应保持唯一职责。相同知识不得在多个文件中重复保存完整正文；需要关联时优先使用稳定条目名称或 Pitfall 编号引用。
@@ -118,10 +118,10 @@ PKB 用于帮助 AI 理解用户希望怎样工作，但不能代替外部项目
 
 * 检查来源和仓库状态；
 * 对候选内容进行文件归属判断；
-* 读取现有 PKB 并查重；
+* 按主题检索 Personal Context、Coding、Pitfall 等正确 owner 并查重、检查反向冲突；
 * 优先合并或原位更新；
-* 在确认后执行修改；
-* 验证并按授权独立提交。
+* 已获得明确执行授权且满足安全门时直接修改；需要决定时先报告具体缺口；
+* 验证后仅按单独授权提交或同步镜像。
 
 动态项目事实通过一次性 Source Package 提供，不永久写入 Skill 或本仓库正文。
 

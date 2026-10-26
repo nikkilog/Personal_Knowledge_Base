@@ -1,6 +1,6 @@
 ---
 name: pkb-knowledge-absorption
-description: Independently review durable knowledge from any Chat window, project closeout package, user-provided source package, local source file, current Codex thread, or PKB repository audit. Route stable personal context, reusable working methods, verified cross-project pitfalls, and PKB-local operating rules into one authoritative owner; deduplicate before writing; remove project-only and temporary details; preserve semantics; validate privacy, source-authority, and repository boundaries; close approved PKB changes in the authoritative local Git repository; and optionally synchronize the validated local commit to the authorized GitHub read-only mirror. Do not require Project Closeout for chat-window review. Do not modify source projects or Workspace_Control, record temporary state, edit PKB through GitHub, force-push, publish, or synchronize to any other cloud destination.
+description: Review durable knowledge from a Chat window, project closeout, supplied source, current Codex task, or PKB audit; route it to the one correct PKB owner, including the Coding knowledge file. Deduplicate, resolve conflicts, preserve evidence and privacy, and make only authorized local edits. Project Closeout is optional. Local commits and GitHub read-only mirror sync require their own authorization; never edit source projects or other cloud copies.
 ---
 
 # PKB Knowledge Absorption
@@ -17,9 +17,9 @@ The Skill must:
 2. route each candidate to one authoritative owner;
 3. check existing coverage before drafting;
 4. keep temporary, project-only, and unsupported details out of PKB;
-5. propose one bounded execution package;
-6. write only after the selected execution mode authorizes it;
-7. validate and, when authorized, commit the PKB independently in local Git;
+5. report a bounded execution scope when audit or a decision is needed;
+6. write only when the current user instruction or selected execution mode authorizes it;
+7. validate and, only when authorized, commit the PKB independently in local Git;
 8. only when explicitly authorized, synchronize that validated local commit to the configured GitHub read-only mirror.
 
 The local PKB repository and local Git history are the editing and Current authority. The GitHub repository is a retrieval mirror for online ChatGPT sessions, not an independent editing source. This Skill must never edit PKB through the GitHub API or treat the mirror as a separate Current.
@@ -41,7 +41,7 @@ PKB does not replace source-project documentation, and Project Closeout is not a
   - `REPOSITORY_ONLY`
 - `SOURCE_PACKAGE`: required for `CHAT_WINDOW_REVIEW`, `PROJECT_CLOSEOUT_PACKAGE`, and `USER_PROVIDED_SOURCE_PACKAGE`.
 - `SOURCE_FILE`: required for `LOCAL_SOURCE_FILE`.
-- `KNOWLEDGE_FOCUS`: `PERSONAL_CONTEXT`, `PITFALLS`, `PKB_OPERATING_RULES`, or `ALL` (default).
+- `KNOWLEDGE_FOCUS`: `PERSONAL_CONTEXT`, `CODING_PREFERENCES`, `PITFALLS`, `PKB_OPERATING_RULES`, or `ALL` (default). Existing values retain their meanings; `PERSONAL_CONTEXT` candidates may route to the Coding owner when their detail belongs there.
 - `EXECUTION_MODE`: `AUDIT_ONLY`, `AUDIT_THEN_CONFIRM` (default), or `DIRECT_EXECUTE_AFTER_SAFE_GATE`.
 - `COMMIT_MODE`: `NO_COMMIT` (default) or `COMMIT_AFTER_VALIDATION`.
 - `MIRROR_SYNC_MODE`: `NO_SYNC` (default) or `SYNC_AFTER_VALIDATED_COMMIT`.
@@ -115,7 +115,7 @@ Before any write:
 1. verify `pwd`, Git root, repository identity, branch, and HEAD;
 2. run `git status --short`;
 3. compare actual changes with `EXPECTED_DIRTY_FILES`;
-4. stop on unexplained modifications, conflicts, or deletions;
+4. identify unexplained modifications, conflicts, or deletions before touching overlapping files; unrelated pre-existing changes permit read-only audit and do not justify resetting or overwriting them;
 5. read the repository's `AGENTS.md` and `PROJECT.md` before applying this Skill;
 6. confirm the working repository is the authoritative local PKB, not a downloaded mirror copy or another cloud checkout.
 
@@ -131,18 +131,9 @@ Never stash, reset, restore, checkout, overwrite, force-push, or silently absorb
 
 ## 5. Sources to Read
 
-Because this Skill maintains PKB itself, always read:
+Read `AGENTS.md` and `PROJECT.md` for PKB maintenance. For ordinary absorption, search by candidate meaning in the likely owner and related files, then read the matching detailed entries, potential opposite rules, and affected Memory projections. The detailed owner search includes `Knowledge/Coding/CODEX_COLLABORATION_AND_LOGIC_PREFERENCES.md` for code, Notebook, Runtime, authentication, data, and delivery rules. Do not skip it merely because an older package calls the candidate `PERSONAL_CONTEXT`.
 
-- `AGENTS.md`
-- `PROJECT.md`
-- `Memory/LONG_TERM_MEMORY.md`
-- `Memory/SHORT_TERM_MEMORY.md`
-- `Memory/ENTITY_MEMORY.md`
-- `Memory/KNOWLEDGE_GRAPH.md`
-- `Knowledge/PERSONAL_CONTEXT.md`
-- `Knowledge/PITFALL_LOG.md`
-
-This full-read rule is specific to PKB maintenance and knowledge absorption. It does not authorize ordinary external-project tasks to read all PKB Current files by default; those tasks should retrieve only task-relevant PKB sections.
+For repository-wide audits, responsibility changes, or substantial consolidation, read the full affected Current files and enough neighboring sections to verify semantic preservation and references. Do not turn this broader audit allowance into a fixed full-read requirement for each new preference. Ordinary external-project work retrieves only task-relevant PKB sections under `AGENTS.md`.
 
 Read only the references required by the candidate types:
 
@@ -181,6 +172,7 @@ Classify every detailed candidate before drafting.
 Use exactly one knowledge type:
 
 - `PERSONAL_CONTEXT`
+- `CODING_PREFERENCE`
 - `PITFALL`
 - `PKB_OPERATING_RULE`
 - `PROJECT_ONLY`
@@ -205,7 +197,7 @@ Prefer, in order:
 2. `UPDATE_EXISTING`
 3. `CREATE_NEW_ENTRY`
 
-Do not write the same detailed knowledge into more than one owner file. Use only a short cross-reference when necessary.
+Search the existing owner for synonyms and opposite instructions before adding anything. New user evidence that corrects an old rule calls for an in-place update of the old entry and affected references, not a second contradictory paragraph. Do not write the same detailed knowledge into more than one owner file. Use only a short cross-reference when necessary.
 
 Reviewing every Chat window does not mean storing every answer. Ordinary general information without durable user-specific, operational, or verified Pitfall value is `GENERAL_INFORMATION_ONLY`.
 
@@ -231,8 +223,9 @@ A Source Package is a transport format, not independent evidence. Its fact level
 - `AGENTS.md`: mandatory PKB-local operating, privacy, file-responsibility, deduplication, archive, validation, and Git rules.
 - `PROJECT.md`: the PKB repository's own purpose, Current files, status, and maintenance entry point.
 - `Knowledge/PERSONAL_CONTEXT.md`: durable personal background, work preferences, communication preferences, output and acceptance habits, reusable collaboration methods, and cross-project operating preferences.
+- `Knowledge/Coding/CODEX_COLLABORATION_AND_LOGIC_PREFERENCES.md`: detailed cross-project code, Notebook, Runtime, authentication, data processing, formulas, verification, file identity, and technical delivery principles. Personal Context may retain a brief summary and pointer.
 - `Knowledge/PITFALL_LOG.md`: incidents that actually occurred and have a reusable trigger, observable symptom, sufficiently established cause, correct handling, and verification.
-- `Memory/`: source-cited high-frequency projection; update only when the detailed owner or explicit confirmed evidence changes.
+- `Memory/`: source-cited high-frequency projection; review only projections affected by a detailed-owner change and do not rewrite unchanged entries for formatting.
 - `90_Archive/`: fully retired knowledge assets with independent traceability value that Git history alone cannot express.
 
 Personal preferences do not authorize deletion, destructive overwrite, cross-repository modification, commit, GitHub mirror synchronization, publication, other cloud synchronization, or writing unconfirmed personal information. Mirror synchronization requires the explicit execution parameter and the repository rules in `AGENTS.md`.
@@ -265,11 +258,11 @@ Phase one is read-only. Return:
 
 Do not modify, delete, stage, or commit.
 
-After explicit confirmation, modify only approved files and entries. Commit only when `COMMIT_MODE` is `COMMIT_AFTER_VALIDATION`. Synchronize the GitHub mirror only when `MIRROR_SYNC_MODE` is `SYNC_AFTER_VALIDATED_COMMIT` and all mirror gates pass.
+When the user has already explicitly authorized the bounded edit, proceed without asking for the same authorization again. Modify only authorized files and entries. Commit only when `COMMIT_MODE` is `COMMIT_AFTER_VALIDATION` and commit authorization is present. Synchronize the GitHub mirror only when `MIRROR_SYNC_MODE` is `SYNC_AFTER_VALIDATED_COMMIT` and separately authorized mirror gates pass.
 
 ### `DIRECT_EXECUTE_AFTER_SAFE_GATE`
 
-Use only when the user explicitly authorizes direct execution and every repository, source-authority, privacy, deletion, scope, commit, and requested mirror-sync gate passes.
+Use when the user explicitly authorizes direct execution and the repository, source-authority, privacy, and edit-scope gates pass. Commit and mirror gates apply only if those actions are requested. An unresolved candidate can be reported separately while other authorized, independent candidates proceed.
 
 ## 11. Semantic Preservation
 
@@ -325,13 +318,13 @@ Default to `MIRROR_SYNC_MODE: NO_SYNC`. Never edit PKB through GitHub, force-pus
 
 ## 13. Result States
 
-Return exactly one execution result:
+Report the actual stage separately: `AUDITED_NO_WRITE`, `WAITING_FOR_DECISION`, `EDITED_UNVALIDATED`, `VALIDATED_UNCOMMITTED`, `COMMITTED_LOCAL`, and, if authorized, mirror status. A read-only audit that found work is not `ALREADY_IN_DESIRED_STATE` and must not imply edits or validation. Preserve these established outcome labels where applicable:
 
-- `ACTION_COMPLETED_NOW`: approved local changes were made and validated; optional mirror synchronization is reported separately.
-- `ALREADY_IN_DESIRED_STATE`: all eligible knowledge was already covered or the supplied candidates require no PKB write; no files changed and no empty commit was created.
-- `BLOCKED`: a global gate or exact required decision is missing.
+- `ACTION_COMPLETED_NOW`: approved local changes were made and validated; commit and mirror status are separate.
+- `ALREADY_IN_DESIRED_STATE`: eligible knowledge was fully covered or required no write; no files changed or empty commit created.
+- `BLOCKED`: a global gate or exact required decision prevents the specified action. State what independent work, if any, was completed.
 
-Keep candidate identification, file edits, validation, and commit state separate.
+Keep candidate identification, file edits, validation, commit, and mirror state distinct.
 
 ## 14. Minimum Contract Checks
 

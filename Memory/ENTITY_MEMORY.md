@@ -3,7 +3,7 @@
 ```text
 MEMORY_ROLE: STABLE_ENTITY_DICTIONARY
 STATUS: CURRENT
-LAST_REVIEWED: 2026-08-23
+LAST_REVIEWED: 2026-10-25
 ```
 
 本文件只回答“实体是什么、它不是什么、去哪里确认”。Lifecycle、版本、branch、commit、run_id、当前任务和下一步不在这里维护。
@@ -29,7 +29,7 @@ LAST_REVIEWED: 2026-08-23
 - Not This: 不是 ChatGPT 账号 Memory，也不是任一 Project 的替代 Current。
 - Owner: 根目录 `AGENTS.md`；最终总入口由 `00_START_HERE.md` 持有。
 - Relations: contains Prompt Library、PKB、Projects、Workspace Control、Account Bootstrap。
-- Evidence: 迁移总合同 §0、§3
+- Evidence: 根目录 `AGENTS.md` §1–§3；`00_START_HERE.md` §根目录各层职责
 - Last Confirmed: `2026-08-23`
 
 ## PROMPT_LIBRARY
@@ -41,7 +41,7 @@ LAST_REVIEWED: 2026-08-23
 - Not This: 不是 Prompt 流水线；索引不是运行依赖；Skill 中的 pointer 不是第二份正文。
 - Owner: `02_PROMPT_LIBRARY/00_PROMPT_INDEX.md`
 - Relations: provides standalone prompts to chats and project workflows。
-- Evidence: 迁移总合同 §3.3；`02_PROMPT_LIBRARY/00_PROMPT_INDEX.md`
+- Evidence: 根目录 `AGENTS.md` §3；`02_PROMPT_LIBRARY/00_PROMPT_INDEX.md` §Current / Pointer / Archive
 - Last Confirmed: `2026-08-23`
 
 ## ACCOUNT_BOOTSTRAP
@@ -53,7 +53,7 @@ LAST_REVIEWED: 2026-08-23
 - Not This: 不是第二套知识 Source of Truth，不能反向覆盖 Workspace。
 - Owner: `01_ACCOUNT_BOOTSTRAP/`
 - Relations: derives from PKB Memory and Knowledge; initializes GPT accounts。
-- Evidence: 迁移总合同 §3.2
+- Evidence: 根目录 `AGENTS.md` §1
 - Last Confirmed: `2026-08-23`
 
 ## PKB
@@ -65,7 +65,7 @@ LAST_REVIEWED: 2026-08-23
 - Not This: 不是外部项目状态仓库，不保存项目 Current、版本或下一步。
 - Owner: `Personal_Knowledge_Base/PROJECT.md`、`AGENTS.md` 与本地 Git。
 - Relations: Memory derives from Knowledge; may inform but does not override Projects。
-- Evidence: `Personal_Knowledge_Base/PROJECT.md`；迁移总合同 §3.4–§3.5
+- Evidence: `Personal_Knowledge_Base/AGENTS.md` §2、§5；`Personal_Knowledge_Base/PROJECT.md` §1–§2
 - Last Confirmed: `2026-08-23`
 
 ## WORKSPACE_CONTROL
@@ -77,7 +77,7 @@ LAST_REVIEWED: 2026-08-23
 - Not This: 不是 Project Current，也不保存项目详细版本、run_id 或下一步。
 - Owner: `Workspace_Control/WORKSPACE.md`、`Workspace_Control/PROJECTS.md`
 - Relations: governs project registry and Workspace lifecycle; routes to Projects。
-- Evidence: 迁移总合同 §3.7；`Workspace_Control/PROJECTS.md`
+- Evidence: 根目录 `AGENTS.md` §1–§2；`Workspace_Control/PROJECTS.md`
 - Last Confirmed: `2026-08-23`
 
 ## PBS
@@ -137,7 +137,7 @@ LAST_REVIEWED: 2026-08-23
 - Not This: 不等同于 PBS；不等同于 CAH；与 COS 的身份关系未确认，不能自动合并。
 - Owner: `Projects/Console_Core/PROJECT.md`
 - Relations: may serve PBS and other Shopify projects; may use Workspace Secret Resolver。
-- Evidence: `Projects/Console_Core/PROJECT.md` §Project Purpose、§Open Questions
+- Evidence: `Projects/Console_Core/PROJECT.md` §Project Purpose、§Open Questions and Known Overlap
 - Last Confirmed: `2026-08-23`
 
 ## WORKSPACE_SECRET_RESOLVER
